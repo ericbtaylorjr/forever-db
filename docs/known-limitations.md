@@ -20,7 +20,7 @@ Keep this current. Add an entry whenever you discover a data quirk.
 
 ## Derived values not computed yet
 
-- **Item stat values.** Items carry only raw allocation (`StatModifier_bonusStat`, `StatPercentEditor`); real stats need `RandPropPoints`/curve/squish logic. `wowsims/gamedata` computes them (its README says from stat allocations and item-level budgets; see `scripts/export_items.py`, and the `forever` repo's `tools/database`); not yet reviewed in detail. Porting or consuming that is the main open item for a useful gear browser. Weapon DPS and armor have the same issue (`ItemDamage*`, `ItemArmor*` tables are extracted but not applied).
+- **Item stat values.** Items carry only raw allocation (`StatModifier_bonusStat`, `StatPercentEditor`). The spike (`docs/item-stats-spike.md`) reproduced wowsims' numbers on 5,200 of 5,225 comparable items and all weapon damage and armor, so the approach is proven but **not yet in the pipeline**. Weapon DPS and armor have the same status.
 - **Tooltip text.** `description`/`auraDescription` are raw templates (`$s1`, `${$1279976m1*$d}`, `$?a14748[...]`). Rendering them needs a resolver using `SpellEffect` values; `wowsims/forever` has a `tools/tooltip` directory that may be relevant (not reviewed).
 - **Icons.** Only `iconFileDataID` is stored; names come from db2tool's `listfile.csv` (`interface/icons/<name>.blp`) and must be resolved when the site is built. Image files themselves are not extracted.
 

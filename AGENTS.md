@@ -11,6 +11,7 @@ Dataset (and, later, browser) of every spell, item and piece of gear in WoW **Fo
 | `data/state.json` | Last ingested build + hotfix push, hotfix-cache hash, per-table column layout, locked-row counts, per-ingest log. Generated. |
 | `pipeline/build_data.py` | Reads a db2tool SQLite dump, joins tables into records, diffs against `data/`, writes `data/`. Python stdlib only. |
 | `pipeline/builds.py` | `check` (is there a new build/hotfix?) and `list` (historical builds + CDN config hashes from wago.tools). |
+| `pipeline/spikes/` | Throwaway prototypes (not production code), each pointing at the doc that explains it. |
 | `pipeline/tests/` | Unit tests on synthetic dumps and stubbed network. |
 | `scan/settings.template.json` | The pinned list of DB2 tables we extract. We own this list (not wowsims). |
 | `scan/forever-ref.txt`, `scan/patches/` | Pinned wowsims/forever commit, and our small patch to db2tool (historical-build pinning). |
@@ -57,4 +58,5 @@ python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would cha
 ## Project status (keep current)
 
 - Done: extraction via db2tool, normalized spells/items, field-level history, history for builds 70245 → 70685 (+ hotfix push 113511), update check, scheduled workflow (written, not yet run on GitHub).
-- Next: run the workflow on GitHub; item stat resolution; spell tooltip rendering; "player-usable spell" filter; the browser UI (GitHub Pages). Open questions live in `docs/known-limitations.md`.
+- Done: item-stats spike (`docs/item-stats-spike.md`): formula proven against wowsims' output, 1–2 days to put in the pipeline.
+- Next: confirm the first real auto-update PR; productionize item stats; spell tooltip rendering; "player-usable spell" filter; the browser UI (GitHub Pages). Open questions live in `docs/known-limitations.md`.
