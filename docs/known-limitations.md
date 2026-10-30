@@ -4,16 +4,18 @@ Keep this current. Add an entry whenever you discover a data quirk.
 
 ## Version history
 
-- **No history before the baseline.** The first ingest (build 70685, push 113441, 2026-10-30) is a snapshot, so every entity has `baseline: true` and "last updated" means "in or before 70685". A local install only holds one build.
-  - Backfill options: (a) fetch earlier builds from the CDN if Blizzard still serves them (needs each build's config hash; db2tool's `--cdn` only fetches the current build; wago.tools lists historical build configs), (b) parse `wowsims/gamedata` `patches/` (class spells and items only, text format; builds 70009 → 70685 listed there). **Not decided.**
-- Hotfix history is similarly limited to pushes we ingest. A hotfix applied and reverted between two scans is invisible.
-- Ingests are keyed by `(build, push)`; the same push read from a different machine's `DBCache.bin` can differ if that client has not received all pushes. Prefer the Raidbots mirror for authoritative data.
+- **History covers 6 builds, 70245 → 70685, plus hotfix push 113511 (2026-10-30).** It was backfilled with `scripts/backfill.sh` from the CDN. Entities untouched since build 70245 still have `baseline: true`; for them "last changed" means "in or before 70245", which is the honest limit of the history. Beta is young, so this covers most of the game's life so far.
+- **Builds we cannot get.** The list of past builds and their CDN config hashes comes from wago.tools, which has only 7 `wowf` entries (the newest, 70707, is the CN region and is skipped). `wowsims/gamedata` has data for earlier builds (70009, 70291, 70334, 70338, 70374, 70425, 70450 …) that wago lacks. If those config hashes can be found (Blizzard's Ribbit history, a community archive), add them to `builds.py list` and re-run the backfill. **Not done.**
+- **Historical builds are base data without hotfixes** (push 0): Raidbots only mirrors the *current* cache. So a build's own hotfixes show up as a separate version (e.g. 70685 push 0 → 70685 push 113511: +59 spells, +478 items, 141/46 changed). Hotfixes applied and reverted between two of our scans are invisible.
+- **Builds 70634 and 70658 contain no spell or item changes** (client-only builds, as far as the data shows). They appear in `state.json` → `builds` with zero counts.
+- **Intermediate builds are folded together if a scan is missed.** The check compares with the latest state, so a skipped build is not ingested separately (history cannot be inserted out of order). The 3-hourly schedule makes this rare.
+- Ingests are keyed by `(build, push)`. The local client's `DBCache.bin` can lag (it was at push 113441 when Raidbots had 113511); never commit a local-install scan over a CDN one.
 
 ## Coverage
 
-- **Locked rows.** Encrypted sections with unknown TACT keys are skipped (the 2026-10-30 scan reported on the order of hundreds of locked rows in `Spell`, `SpellEffect`, `SpellMisc`, `Item`, `ItemSparse`, …). Those spells/items may be missing or partial. The baseline ingest was run without `--scan-log`, so `state.json` has no per-table counts yet; the first `scripts/scan.sh` run that ingests a new version will record them.
+- **Locked rows.** Encrypted sections with unknown TACT keys are skipped (4,850 rows at push 113511, mostly `SpellEffect` 1,301, `SpellMisc` 945, `SpellName` 606, `Spell` 473; recorded in `state.json` → `scan.lockedRows`). Those spells/items may be missing or partial, and appear later as `added` once a key is published. Only the latest ingest's counts are kept in `scan`.
 - **"Spell" ≠ "spell players can use".** `Spell` has ~32k rows including old/test/internal spells (names like `Word of Recall (OLD)`, `temp` icons). No availability filter exists yet. Candidate signals: appears in `SkillLineAbility`, `Talent`, `ItemEffect`, `ItemSetSpell`, has a non-empty name/description.
-- **Items** = `ItemSparse` rows (19,735), of which 8,505 are gear. Max `itemLevel` is 100 in this build, so Forever uses a classic-style scale.
+- **Items** = `ItemSparse` rows (19,735 live at push 113511), of which 8,257 have `isGear` (weapon or armor class with an equip slot). Counting every item with an equip slot regardless of class gives a larger number (~8.5k) because quivers, bags and similar have slots too. Max `itemLevel` is 100, so Forever uses a classic-style scale.
 - Not extracted: item drop/vendor sources (`JournalEncounterItem` came back empty), quests, NPCs, spell visuals, and non-`enUS` text.
 
 ## Derived values not computed yet
@@ -30,5 +32,7 @@ Keep this current. Add an entry whenever you discover a data quirk.
 
 ## Tooling
 
-- Extraction depends on wowsims/forever `tools/db2tool` (MIT) and its network downloads (WoWDBDefs, `listfile.csv`, community TACT keys). Pin and record the commit used per scan; scans are not bit-for-bit reproducible if those inputs move.
+- Extraction depends on wowsims/forever `tools/db2tool` (MIT) and its network downloads (WoWDBDefs, `listfile.csv`, community TACT keys). The tool commit is pinned in `scan/forever-ref.txt`, but the downloads are not, so scans are not bit-for-bit reproducible if those inputs move.
+- **We carry a patch to db2tool** (`scan/patches/db2tool-cdn-pin.patch`, adds `--cdn-pin` to extract a historical build). Suggested: upstream it to wowsims/forever so we can drop it; until then a bump of `forever-ref.txt` may need the patch rebased.
+- **The `update-data.yml` workflow has never run on GitHub.** Its steps were exercised locally, the YAML was not linted. It needs the repo setting *Allow auto-merge* for hands-off merges. Verify with a manual run before relying on it.
 - Re-ingesting the *same* version is a no-op, so a scan taken before the client has finished pulling hotfixes cannot be "topped up" without `--force`.

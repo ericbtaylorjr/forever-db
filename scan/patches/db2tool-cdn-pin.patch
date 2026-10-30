@@ -1,0 +1,73 @@
+diff --git a/tools/db2tool/main.go b/tools/db2tool/main.go
+index 7790d90..2a580c8 100644
+--- a/tools/db2tool/main.go
++++ b/tools/db2tool/main.go
+@@ -58,6 +58,9 @@ type options struct {
+ 	keyFile       string   // community TACT key list; empty → tools/db2tool/TACTKeys.txt
+ 	cdn           bool     // read the current build from Blizzard's CDN instead of BaseDir
+ 	region        string   // version service region for --cdn
++	pinVersion    string   // --cdn-pin: read this build instead of the current one
++	pinBuildCfg   string
++	pinCDNCfg     string
+ }
+ 
+ // parseArgs scans the args pairwise. --settings/-s and --output/-output/-o
+@@ -103,6 +106,15 @@ func parseArgs(args []string) (options, error) {
+ 			opts.cdn = true
+ 		case "--region":
+ 			opts.region, err = next()
++		case "--cdn-pin": // <version>:<buildConfig>:<cdnConfig>, implies --cdn
++			var v string
++			if v, err = next(); err == nil {
++				parts := strings.Split(v, ":")
++				if len(parts) != 3 {
++					return opts, fmt.Errorf("invalid --cdn-pin %q: want <version>:<buildConfig>:<cdnConfig>", v)
++				}
++				opts.cdn, opts.pinVersion, opts.pinBuildCfg, opts.pinCDNCfg = true, parts[0], parts[1], parts[2]
++			}
+ 		case "--build":
+ 			var v string
+ 			if v, err = next(); err == nil {
+@@ -205,7 +217,11 @@ func run(args []string) error {
+ 		// Local-CASC mode (the default) and CDN mode: everything from the
+ 		// install or the CDN, through the same Build.
+ 		if opts.cdn {
+-			build, err = tact.OpenCDN(settings.Settings.Product, opts.region, filepath.Join(toolHome, "cdncache"))
++			var pin *tact.CDNPin
++			if opts.pinVersion != "" {
++				pin = &tact.CDNPin{Version: opts.pinVersion, BuildConfig: opts.pinBuildCfg, CDNConfig: opts.pinCDNCfg}
++			}
++			build, err = tact.OpenCDN(settings.Settings.Product, opts.region, filepath.Join(toolHome, "cdncache"), pin)
+ 		} else if settings.Settings.BaseDir == "" {
+ 			return fmt.Errorf("settings BaseDir is required (or pass --cdn, or --build for offline mode)")
+ 		} else {
+diff --git a/tools/db2tool/tact/cdn.go b/tools/db2tool/tact/cdn.go
+index 69db4fa..db5b3de 100644
+--- a/tools/db2tool/tact/cdn.go
++++ b/tools/db2tool/tact/cdn.go
+@@ -48,9 +48,12 @@ type cdnStore struct {
+ 	entries  map[[16]byte]archiveEntry
+ }
+ 
++// CDNPin selects a specific build instead of the one the version service names.
++type CDNPin struct{ Version, BuildConfig, CDNConfig string }
++
+ // OpenCDN loads the current build of product from the CDN, using the
+ // version service of region (e.g. "us") to find both.
+-func OpenCDN(product, region, cacheDir string) (*Build, error) {
++func OpenCDN(product, region, cacheDir string, pin *CDNPin) (*Build, error) {
+ 	s := &cdnStore{
+ 		cacheDir: cacheDir,
+ 		client:   &http.Client{Timeout: 10 * time.Minute},
+@@ -59,6 +62,11 @@ func OpenCDN(product, region, cacheDir string) (*Build, error) {
+ 	if err != nil {
+ 		return nil, err
+ 	}
++	if pin != nil {
++		// A historical build: the version service only names the current one,
++		// so the caller supplies the configs (wago.tools/api/builds lists them).
++		versions["VersionsName"], versions["BuildConfig"], versions["CDNConfig"] = pin.Version, pin.BuildConfig, pin.CDNConfig
++	}
+ 	entry := AvailableBuild{
+ 		Product:     product,
+ 		Version:     versions["VersionsName"],

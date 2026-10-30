@@ -1,46 +1,196 @@
 {
- "baselineBuild": 70685,
- "baselinePush": 113441,
+ "baselineBuild": 70245,
+ "baselinePush": 0,
  "build": 70685,
  "builds": [
   {
-   "build": 70685,
+   "build": 70245,
    "counts": {
     "items": {
-     "added": 19735,
+     "added": 19230,
      "changed": 0,
      "removed": 0,
      "unchanged": 0
     },
     "spells": {
-     "added": 32031,
+     "added": 31747,
      "changed": 0,
      "removed": 0,
      "unchanged": 0
     }
    },
-   "hotfixPush": 113441,
+   "hotfixPush": 0,
+   "hotfixes": "none applied for build 70245",
+   "version": "1.60.1.70245"
+  },
+  {
+   "build": 70532,
+   "counts": {
+    "items": {
+     "added": 47,
+     "changed": 500,
+     "removed": 20,
+     "unchanged": 18710
+    },
+    "spells": {
+     "added": 223,
+     "changed": 2122,
+     "removed": 8,
+     "unchanged": 29617
+    }
+   },
+   "hotfixPush": 0,
+   "hotfixes": "none applied for build 70532",
+   "version": "1.60.1.70532"
+  },
+  {
+   "build": 70630,
+   "counts": {
+    "items": {
+     "added": 0,
+     "changed": 28,
+     "removed": 0,
+     "unchanged": 19229
+    },
+    "spells": {
+     "added": 9,
+     "changed": 127,
+     "removed": 0,
+     "unchanged": 31835
+    }
+   },
+   "hotfixPush": 0,
+   "hotfixes": "none applied for build 70630",
+   "version": "1.60.1.70630"
+  },
+  {
+   "build": 70634,
+   "counts": {
+    "items": {
+     "added": 0,
+     "changed": 0,
+     "removed": 0,
+     "unchanged": 19257
+    },
+    "spells": {
+     "added": 0,
+     "changed": 0,
+     "removed": 0,
+     "unchanged": 31971
+    }
+   },
+   "hotfixPush": 0,
+   "hotfixes": "none applied for build 70634",
+   "version": "1.60.1.70634"
+  },
+  {
+   "build": 70658,
+   "counts": {
+    "items": {
+     "added": 0,
+     "changed": 0,
+     "removed": 0,
+     "unchanged": 19257
+    },
+    "spells": {
+     "added": 0,
+     "changed": 0,
+     "removed": 0,
+     "unchanged": 31971
+    }
+   },
+   "hotfixPush": 0,
+   "hotfixes": "none applied for build 70658",
+   "version": "1.60.1.70658"
+  },
+  {
+   "build": 70685,
+   "counts": {
+    "items": {
+     "added": 0,
+     "changed": 1,
+     "removed": 0,
+     "unchanged": 19256
+    },
+    "spells": {
+     "added": 1,
+     "changed": 1,
+     "removed": 0,
+     "unchanged": 31970
+    }
+   },
+   "hotfixPush": 0,
+   "hotfixes": "none applied for build 70685",
+   "version": "1.60.1.70685"
+  },
+  {
+   "build": 70685,
+   "counts": {
+    "items": {
+     "added": 478,
+     "changed": 46,
+     "removed": 0,
+     "unchanged": 19211
+    },
+    "spells": {
+     "added": 59,
+     "changed": 141,
+     "removed": 0,
+     "unchanged": 31831
+    }
+   },
+   "hotfixPush": 113511,
+   "hotfixes": "build 70685 up to push 113511",
    "version": "1.60.1.70685"
   }
  ],
  "counts": {
   "items": {
-   "added": 19735,
-   "changed": 0,
+   "added": 478,
+   "changed": 46,
    "removed": 0,
-   "unchanged": 0
+   "unchanged": 19211
   },
   "spells": {
-   "added": 32031,
-   "changed": 0,
+   "added": 59,
+   "changed": 141,
    "removed": 0,
-   "unchanged": 0
+   "unchanged": 31831
   }
  },
- "hotfixPush": 113441,
+ "hotfixPush": 113511,
  "product": "wowf",
  "scan": {
-  "lockedRows": {}
+  "hotfixCacheSha256": "ebc2f037e07956d6394d9e27fb97831dde88fb6db5c3bc563e9da797801e8474",
+  "hotfixSummary": "build 70685 up to push 113511",
+  "lockedRows": {
+   "AreaTable": 46,
+   "Item": 54,
+   "ItemEffect": 32,
+   "ItemSparse": 63,
+   "ItemXItemEffect": 33,
+   "Map": 8,
+   "SkillLineAbility": 1,
+   "Spell": 473,
+   "SpellAuraOptions": 66,
+   "SpellAuraRestrictions": 17,
+   "SpellCastingRequirements": 44,
+   "SpellCategories": 344,
+   "SpellClassOptions": 9,
+   "SpellCooldowns": 68,
+   "SpellEffect": 1301,
+   "SpellEquippedItems": 17,
+   "SpellInterrupts": 314,
+   "SpellItemEnchantment": 1,
+   "SpellLabel": 36,
+   "SpellLevels": 154,
+   "SpellMisc": 945,
+   "SpellName": 606,
+   "SpellPower": 41,
+   "SpellReagents": 38,
+   "SpellShapeshift": 1,
+   "SpellTargetRestrictions": 138
+  }
  },
  "schema": {
   "AreaGroupMember": [

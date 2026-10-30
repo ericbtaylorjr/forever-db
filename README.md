@@ -5,8 +5,9 @@ A versioned dataset of every spell, item and piece of gear in WoW Forever, built
 Start with [AGENTS.md](AGENTS.md). Details: [data model](docs/data-model.md) · [update runbook](docs/update-runbook.md) · [known limitations](docs/known-limitations.md).
 
 ```sh
-FOREVER_REPO=~/dev/forever scripts/scan.sh          # scan the local client and update data/
+FOREVER_REPO=~/dev/forever scripts/scan.sh --cdn    # scan the live build and update data/
+python3 pipeline/builds.py check                    # is there a new build or hotfix?
 python3 -m unittest discover -s pipeline/tests      # tests
 ```
 
-Current data: see `data/state.json`.
+`data/` updates itself via a scheduled GitHub Action (every 3 h; see the runbook). Current data: see `data/state.json`.

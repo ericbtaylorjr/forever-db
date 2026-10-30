@@ -51,7 +51,8 @@ class IngestTest(unittest.TestCase):
         return path
 
     def ingest(self, db, **flags):
-        ns = dict(db=str(db), scan_log=None, allow_schema_change=False, force=False, dry_run=False)
+        ns = dict(db=str(db), scan_log=None, hotfix_cache=None, summary_file=None, allow_no_hotfixes=False,
+                  allow_schema_change=False, force=False, dry_run=False)
         ns.update(flags)
         return build_data.cmd_ingest(argparse.Namespace(**ns))
 
@@ -119,6 +120,38 @@ class IngestTest(unittest.TestCase):
         build_data.DATA = Path(self.tmp.name) / "data2"
         self.ingest(db)
         self.assertEqual(first, (build_data.DATA / "spells.jsonl").read_bytes())
+
+    def log(self, text):
+        path = Path(self.tmp.name) / "scan.log"
+        path.write_text(text)
+        return str(path)
+
+    def test_scan_without_hotfixes_is_refused_after_a_hotfixed_one(self):
+        self.ingest(self.db("a.db", version="1.60.1.100", push=50, spells={1: ("A", "x")}))
+        lost = self.db("b.db", version="1.60.1.200", push=0, spells={1: ("A", "x")})
+        log = self.log("Hotfixes: none applied for build 200\n")
+        with self.assertRaises(SystemExit):
+            self.ingest(lost, scan_log=log)
+        self.assertEqual(self.ingest(lost, scan_log=log, allow_no_hotfixes=True), 0)
+
+    def test_mass_change_is_flagged_and_summarised(self):
+        many = {i: (f"S{i}", "old") for i in range(1, 21)}
+        self.ingest(self.db("a.db", spells=many))
+        out = Path(self.tmp.name) / "summary.md"
+        self.ingest(self.db("b.db", version="1.60.1.200", spells={i: (f"S{i}", "new") for i in many}),
+                    summary_file=str(out), scan_log=self.log("  Spell: 3 rows locked by TACT key AB\nHotfixes: build 200 up to push 9\n"))
+        text = out.read_text()
+        self.assertIn("Needs review", text)
+        self.assertIn("| spells | 0 | 20 | 0 | 0 |", text)
+        self.assertIn("Spell 3", text)
+        self.assertEqual(build_data.suspicious({"spells": {"changed": 1, "unchanged": 99, "removed": 0}}, {}), [])
+
+    def test_hotfix_cache_hash_is_stored(self):
+        cache = Path(self.tmp.name) / "DBCache.bin"
+        cache.write_bytes(b"abc")
+        self.ingest(self.db("a.db", spells={1: ("A", "x")}), hotfix_cache=str(cache))
+        state = json.loads((build_data.DATA / "state.json").read_text())
+        self.assertEqual(state["scan"]["hotfixCacheSha256"], "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
 
     def test_default_values_are_omitted(self):
         self.ingest(self.db("a.db", spells={1: ("A", "x")}))

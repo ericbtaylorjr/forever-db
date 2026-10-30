@@ -33,6 +33,9 @@ SPELL_LOOKUP_TABLES = {
 }
 # Only these ClassIDs carry equippable gear; InventoryType 0 means "not equippable".
 GEAR_CLASSES = {2, 4}
+# An ingest changing/removing more than this share of entities is flagged for human review.
+MAX_CHANGED_RATIO = 0.10
+MAX_REMOVED_RATIO = 0.02
 
 _EXPANDED = re.compile(r"^(.*)_(\d+)$")
 
@@ -279,6 +282,8 @@ def cmd_ingest(args):
     version, push = build_info["Version"], build_info["HotfixPush"]
     build = int(version.rsplit(".", 1)[1])
     scan = parse_scan_log(args.scan_log)
+    if args.hotfix_cache:
+        scan["hotfixCacheSha256"] = hashlib.sha256(Path(args.hotfix_cache).read_bytes()).hexdigest()
 
     state_path = DATA / "state.json"
     state = json.loads(state_path.read_text()) if state_path.exists() else None
@@ -289,6 +294,10 @@ def cmd_ingest(args):
             return 0
         if (build, push) < (state["build"], state["hotfixPush"]) and not args.force:
             sys.exit(f"Refusing to ingest older data ({version}/{push}) over {state['version']}/{state['hotfixPush']}.")
+        # A scan that lost its hotfix overlay would record every hotfixed entity as changed.
+        if "none applied" in scan.get("hotfixSummary", "") and state["hotfixPush"] > 0 and not args.allow_no_hotfixes:
+            sys.exit("db2tool applied no hotfixes to this build, but the previous ingest had some. Check the hotfix cache "
+                     "(docs/update-runbook.md, \"When it breaks\"), or pass --allow-no-hotfixes if that is intended.")
         changed_tables = sorted(t for t in set(fingerprint) | set(state["schema"]) if fingerprint.get(t) != state["schema"].get(t))
         if changed_tables and not args.allow_schema_change:
             sys.exit("Table layouts changed since the last ingest, which would show up as bogus field diffs:\n  "
@@ -310,12 +319,45 @@ def cmd_ingest(args):
         "schema": fingerprint, "scan": scan, "counts": results,
     }
     builds = (state or {}).get("builds", [])
-    builds.append({"version": version, "build": build, "hotfixPush": push, "counts": results})
+    builds.append({"version": version, "build": build, "hotfixPush": push, "counts": results,
+                   "hotfixes": scan.get("hotfixSummary", "unknown")})
     new_state["builds"] = builds
+    reasons = [] if baseline else suspicious(results, state["counts"])
+    summary = {"version": version, "push": push, "baseline": baseline, "suspicious": reasons, **results}
     if not args.dry_run:
         state_path.write_text(json.dumps(new_state, indent=1, sort_keys=True) + "\n")
-    print(json.dumps({"version": version, "push": push, "baseline": baseline, **results}, indent=1))
+    if args.summary_file:
+        Path(args.summary_file).write_text(render_summary(summary, scan))
+    print(json.dumps(summary, indent=1))
     return 0
+
+
+def suspicious(results, previous):
+    """Reasons an ingest looks like a tool/schema problem rather than a game update."""
+    reasons = []
+    for kind, st in results.items():
+        total = sum(st[k] for k in ("changed", "unchanged", "removed")) or 1
+        if st["changed"] / total > MAX_CHANGED_RATIO:
+            reasons.append(f"{kind}: {st['changed']} of {total} entities changed (>{MAX_CHANGED_RATIO:.0%})")
+        if st["removed"] / total > MAX_REMOVED_RATIO:
+            reasons.append(f"{kind}: {st['removed']} of {total} entities removed (>{MAX_REMOVED_RATIO:.0%})")
+    return reasons
+
+
+def render_summary(summary, scan):
+    lines = [f"## Forever {summary['version']} (hotfix push {summary['push']})", "",
+             f"Hotfixes: {scan.get('hotfixSummary', 'unknown')}", "",
+             "| | added | changed | removed | unchanged |", "|---|---|---|---|---|"]
+    for kind in ("spells", "items"):
+        st = summary[kind]
+        lines.append(f"| {kind} | {st['added']} | {st['changed']} | {st['removed']} | {st['unchanged']} |")
+    if scan.get("lockedRows"):
+        lines += ["", "Rows hidden behind unknown TACT keys: "
+                  + ", ".join(f"{t} {n}" for t, n in sorted(scan["lockedRows"].items()))]
+    if summary["suspicious"]:
+        lines += ["", "**Needs review - this looks like a tool or schema problem, not a game update:**"]
+        lines += [f"- {r}" for r in summary["suspicious"]]
+    return "\n".join(lines) + "\n"
 
 
 def main():
@@ -324,6 +366,9 @@ def main():
     i = sub.add_parser("ingest", help="diff a db2tool dump against data/ and record the changes")
     i.add_argument("--db", required=True, help="SQLite file written by db2tool")
     i.add_argument("--scan-log", help="saved db2tool stdout (records locked-row counts)")
+    i.add_argument("--hotfix-cache", help="DBCache.bin used for the scan; its hash is stored so `builds.py check` can detect new hotfixes")
+    i.add_argument("--summary-file", help="write a markdown summary here (used as the PR body)")
+    i.add_argument("--allow-no-hotfixes", action="store_true", help="accept a scan with no hotfix overlay (historical builds)")
     i.add_argument("--allow-schema-change", action="store_true")
     i.add_argument("--force", action="store_true", help="re-ingest the same or an older build")
     i.add_argument("--dry-run", action="store_true")

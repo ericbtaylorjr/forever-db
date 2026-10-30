@@ -1,55 +1,80 @@
 # Update runbook
 
-How to refresh `data/` after the game updates. Intended to be followed by a person or by an agent.
+How `data/` is kept current, by automation or by hand. Written to be followed by a person or an agent.
 
-## 0. One-time setup
+## How updates reach `data/`
 
-- Go ≥ 1.25, Python ≥ 3.10 (stdlib only).
-- `git clone https://github.com/wowsims/forever` somewhere; set `FOREVER_REPO` to it. Note its commit; `scan.sh` logs it.
-- WSL: the default `WOW_DIR` is `/mnt/c/Program Files (x86)/World of Warcraft`. Override if different. `_forever_/` is the Forever client; the CASC archive and `.build.info` sit one level up and are shared with other clients.
-
-## 1. Choose a source
-
-| Mode | Command | When |
-|---|---|---|
-| Local install | `scripts/scan.sh` | Game is updated through the launcher on this machine. Uses your own `DBCache.bin` hotfixes (log in and idle first so the client has pulled the latest). |
-| CDN | `scripts/scan.sh --cdn` | CI or a machine without the game. Hotfixes come from `--dbcache <file>` or db2tool's `caches/`; wowsims mirrors the live cache at `https://storage.googleapis.com/raidbots-static/wow/forever/enUS/DBCache.bin`. Without a cache for the build you get base data only. |
-
-Local mode loads every `DBCache.bin` under the install (including `_retail_`, `_classic_beta_`); only the one matching the extracted build applies. Check the `Hotfixes:` line in the output says `build <N> up to push <P>`, not `none applied`.
-
-## 2. Run
-
-```sh
-FOREVER_REPO=~/dev/forever scripts/scan.sh
+```
+every 3 h (GitHub Action)            you, manually
+        │                                  │
+ builds.py check ── nothing new → stop     │
+        │ new build or hotfix push         │
+        ▼                                  ▼
+ scripts/scan.sh --cdn  ───────►  scripts/scan.sh (local)  / --cdn
+   db2tool → .scan/scan.db → build_data.py ingest → data/ → PR
 ```
 
-This writes `.scan/scan.db` + `.scan/scan.log` and runs `pipeline/build_data.py ingest`. Same build + push as the last ingest is a no-op; older data is refused.
+- **What counts as "new":** the US version service reports a different `wowf` build than `data/state.json`, **or** Raidbots' mirror of the live `DBCache.bin` has a different SHA-256 than the one stored at the last ingest (new hotfix push). See `pipeline/builds.py check`.
+- **Missed a build?** The check compares with the *latest* state, so a delayed run still picks up the newest build and ingests it; changes from skipped intermediate builds are folded into that one version (history can't be inserted out of order). Running every 3 h keeps this rare. Manual trigger: Actions → *Update data* → *Run workflow* (tick *force* to scan even when nothing looks new).
+- **Routine PRs merge themselves** (squash, auto-merge; this needs *Allow auto-merge* enabled in the repo settings, otherwise the PR just waits for you to merge it). If the ingest is flagged (see below) the PR is labelled `needs-review` and waits for a person.
 
-## 3. Verify before committing
+## Sources and why they matter
 
-1. Ingest prints `added / changed / removed / unchanged` per kind. Compare with the previous entries in `data/state.json` → `builds`. A normal hotfix touches tens to a few hundred entities. Thousands means something systemic (tool bug, schema, wrong source) – stop and investigate.
-2. `git diff --stat data/` should be small. `git diff data/history` should read like patch notes.
-3. Spot check 2–3 changed entries against the game or wowhead-style knowledge.
-4. `lockedRows` in `state.json`: a growing count means new encrypted content whose TACT key isn't known yet. Re-scan later (keys are fetched from the community list, refreshed daily).
-5. Run `python3 -m unittest discover -s pipeline/tests`.
+| Source | Used for | Notes |
+|---|---|---|
+| Local install (`scan.sh`, no flags) | Quick manual scan | Uses *your* client's `DBCache.bin`, which lags behind: on 2026-10-30 it was at hotfix push 113441 while Raidbots had 113511. Prefer `--cdn` for anything you commit. |
+| CDN + Raidbots cache (`scan.sh --cdn`) | CI and normal updates | Build from Blizzard's CDN, hotfixes from `https://storage.googleapis.com/raidbots-static/wow/forever/enUS/DBCache.bin`, applied with `--carry-hotfixes` so a cache one build behind still applies. |
+| CDN pinned (`scan.sh --pin VER:BUILDCFG:CDNCFG`) | History backfill | Needs a small patch to db2tool (`scan/patches/db2tool-cdn-pin.patch`, applied automatically). Base data only: Raidbots only has the *current* cache. |
 
-Commit message: `data: 1.60.1.<build> push <push>` and paste the counts.
+`db2tool` comes from [wowsims/forever](https://github.com/wowsims/forever), pinned by commit in `scan/forever-ref.txt`. Bumping it can change output (new tables, new schema definitions), so bump deliberately: update the file, run `scan.sh --cdn`, and look at the ingest summary.
+
+## Manual update
+
+```sh
+export FOREVER_REPO=~/dev/forever            # checkout of wowsims/forever at scan/forever-ref.txt
+python3 pipeline/builds.py check             # is there anything new?
+scripts/scan.sh --cdn                        # scan + ingest; writes .scan/summary.md
+python3 -m unittest discover -s pipeline/tests
+git checkout -b data/<version>-push<push> && git add data && git commit -m "data: <version> push <push>"
+```
+
+Setup: Go ≥ 1.25 and Python ≥ 3.10 (stdlib only). `scan.sh` needs network for the CDN, WoWDBDefs, the community listfile and TACT key list (db2tool downloads those into its checkout).
+
+`scan.sh` with no flags scans the local install (`WOW_DIR`, default `/mnt/c/Program Files (x86)/World of Warcraft`; the CASC archive and `.build.info` sit one level above `_forever_/`, shared with other clients). Use it when debugging or when the CDN is unreachable.
+
+## Verifying an ingest
+
+The ingest prints and saves (`.scan/summary.md`) added/changed/removed/unchanged per kind and, automatically, flags it **Needs review** when more than 10 % of entities changed or 2 % were removed. That threshold is a tripwire for tool/schema problems, not a statement about normal updates. Typical real updates in the history so far: tens to a few hundred changed entities, and a few hundred new items/spells when a hotfix adds content.
+
+Also check:
+1. `Hotfixes: build N up to push P` – not `none applied`. (The ingest refuses a no-hotfix scan after a hotfixed one unless `--allow-no-hotfixes`.)
+2. `git diff --stat data/` is small and `git diff data/history` reads like patch notes.
+3. Spot check 2–3 changed entries against the game.
+4. `state.json` → `scan.lockedRows`: a growing count means new encrypted content whose TACT key isn't public yet; those entities are hidden, not removed (AGENTS.md rule 7).
+
+Commit message: `data: <version> push <push>` plus the counts.
 
 ## Schema changes
 
-The ingest aborts with `Table layouts changed since the last ingest` when a table's columns differ. Causes: a client patch changed a DB2 layout, WoWDBDefs gained names for formerly anonymous columns (`Field_5_5_4_…` → real name), or the wowsims tool changed.
+The ingest aborts with `Table layouts changed since the last ingest` when any extracted table's columns differ from `state.json` → `schema`. Causes: a client patch changed a DB2 layout, WoWDBDefs gained real names for formerly anonymous columns (`Field_5_5_4_…`), or the pinned wowsims commit changed.
 
-1. Read the listed tables and compare with `data/state.json` → `schema` to see exactly which columns moved.
-2. If purely cosmetic renames: re-run with `--allow-schema-change` and expect one-off "changes" on the renamed paths for every entity of that table. Note it in the commit message and in `known-limitations.md` so nobody reads them as game changes.
-3. If new columns carry real information, check `data-model.md` still describes the output, and add tests if the pipeline needs to treat them specially.
+1. Compare the listed tables with `state.json` → `schema` to see which columns moved.
+2. Purely cosmetic renames: re-run with `INGEST_ARGS=--allow-schema-change`; expect one-off "changes" on the renamed paths for every entity of that table. Say so in the commit message and note it in `known-limitations.md` so nobody reads them as game changes.
+3. New columns with real information: make sure `data-model.md` still describes the output; add tests if the pipeline needs special handling.
+
+## Backfilling history
+
+`scripts/backfill.sh` **deletes `data/`** and rebuilds it: every build in wago.tools' list up to the live one (oldest first, base data, push 0), then the live build with hotfixes. Use it to (re)create history, e.g. after a pipeline change that alters record contents. `pipeline/builds.py list` shows what it will use.
+
+Limits (also in `known-limitations.md`): wago.tools' list is the only source of old config hashes and does not have every build (wowsims/gamedata knows of builds that wago lacks); Blizzard prunes old builds from the CDN, so far every listed one still works; historical builds have no hotfix overlay.
+
+Rewriting `data/` this way changes every entity's `firstSeen`/`lastChanged` bookkeeping; commit it as a single `data: rebuild history` commit.
 
 ## When it breaks
 
-- *`rows locked by TACT key`* – normal; see above.
-- *Build parse errors / missing table* – the wowsims tool may need a newer commit (`git pull` in `FOREVER_REPO`), or WoWDBDefs hasn't got the build's layout yet. Check the db2tool output for the `.dbd` it picked.
-- *Counts drop sharply* – a table failed to decode and the spells/items depending on it lost data. Do **not** ingest; fix the source first. (The pipeline would record the loss as mass `changed`/`removed`.)
-- *Need to correct bad data already ingested* – revert the commit that wrote it, then re-ingest. Don't edit `data/` by hand.
-
-## Automating (planned)
-
-A scheduled GitHub Action: check Blizzard's version service for the `wowf` build and the Raidbots hotfix cache every few hours (wowsims/gamedata does this every 3 h); on change, run the CDN scan, ingest, run tests, open a PR with the counts. Not built yet.
+- *`rows locked by TACT key`* – normal (see above).
+- *Missing table / decode error after a game patch* – WoWDBDefs may lack the new layout; check which `.dbd` db2tool picked (output names it). Try bumping `scan/forever-ref.txt` to a newer wowsims commit.
+- *Counts swing wildly or ingest flagged* – a table failed to decode and dependent entities lost data. Do **not** merge; fix the source first, then re-run.
+- *`--cdn` scan has no hotfixes* – the Raidbots mirror is unreachable or empty; the ingest will refuse. Retry later; do not force.
+- *Bad data already merged* – revert the commit that wrote it and re-ingest. Never edit `data/` by hand.
+- *Workflow itself* – `.github/workflows/update-data.yml` has not run on GitHub yet (it was written and its steps exercised locally, but not as a workflow). First thing to check after enabling it: Actions → *Update data* → *Run workflow*.

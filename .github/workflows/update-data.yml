@@ -1,0 +1,80 @@
+# Keeps data/ current with the live Forever build and its hotfixes. See docs/update-runbook.md.
+name: Update data
+on:
+  schedule:
+    - cron: "17 */3 * * *" # every 3 hours, like wowsims/gamedata
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Scan even if nothing looks new"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for a new build or hotfix push
+        id: check
+        run: python3 pipeline/builds.py check --cache-out "$RUNNER_TEMP/DBCache.bin" --github-output
+
+      - name: Run tests
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        run: python3 -m unittest discover -s pipeline/tests
+
+      - name: Check out db2tool (pinned in scan/forever-ref.txt)
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        run: |
+          git clone --filter=blob:none https://github.com/wowsims/forever.git "$RUNNER_TEMP/forever"
+          git -C "$RUNNER_TEMP/forever" checkout "$(cat scan/forever-ref.txt)"
+
+      - uses: actions/setup-go@v5
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        with:
+          go-version-file: ${{ runner.temp }}/forever/go.mod
+          cache: false
+
+      - name: Scan and ingest
+        id: scan
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        env:
+          FOREVER_REPO: ${{ runner.temp }}/forever
+          SCAN_WORK: ${{ runner.temp }}/scan
+        run: |
+          scripts/scan.sh --cdn
+          if grep -q "Needs review" "$SCAN_WORK/summary.md"; then echo "review=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Open a pull request
+        if: steps.check.outputs.changed == 'true' || inputs.force
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SUMMARY: ${{ runner.temp }}/scan/summary.md
+        run: |
+          if git diff --quiet -- data; then echo "No data changes."; exit 0; fi
+          VERSION="$(python3 -c "import json;s=json.load(open('data/state.json'));print(f\"{s['version']}-push{s['hotfixPush']}\")")"
+          BRANCH="data/$VERSION"
+          git config user.name "forever-db bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add data
+          git commit -m "data: $VERSION"
+          git push -u origin "$BRANCH"
+          LABEL=""
+          if [ "${{ steps.scan.outputs.review }}" = "true" ]; then
+            gh label create needs-review --color d93f0b --description "Ingest looks like a tool/schema problem" 2>/dev/null || true
+            LABEL="--label needs-review"
+          fi
+          gh pr create --base main --head "$BRANCH" --title "data: $VERSION" --body-file "$SUMMARY" $LABEL
+          # Routine updates merge themselves; anything flagged for review waits for a person.
+          [ -z "$LABEL" ] && gh pr merge "$BRANCH" --squash --auto || true

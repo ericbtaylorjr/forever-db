@@ -18,16 +18,16 @@ All JSONL is sorted by `id`, keys sorted, compact.
 ```jsonc
 {
   "id": 10,
-  "firstSeen":   {"build": 70685, "push": 113441},  // first ingest that contained it
-  "lastChanged": {"build": 70685, "push": 113441},  // last ingest where any field differed
-  "baseline": true,   // true => seen in the very first ingest; real firstSeen/lastChanged may be EARLIER
+  "firstSeen":   {"build": 70245, "push": 0},       // first ingest that contained it
+  "lastChanged": {"build": 70532, "push": 0},       // last ingest where any field differed
+  "baseline": true,   // true => seen in the very first ingest (build 70245); real firstSeen may be EARLIER
   "removed": true,    // only present when the entity vanished from a later dump
   "hash": "bf66fe819d61b6bc",  // sha1 prefix of `data`; equal hash => no change
   "data": { ... }     // see below
 }
 ```
 
-`lastChanged` is exact only for changes after the baseline. For entities that still have `baseline: true`, read it as "last changed in or before this version". Backfilling earlier builds is tracked in `known-limitations.md`.
+**Versions.** A version is `{build, push}`. `push` is the server's hotfix push number; **`push: 0` is a build's base data with no hotfix overlay** (all historical builds). `(build, push)` orders versions. History starts at build 70245, so `lastChanged` is exact only after that; for entities with `baseline: true` and `lastChanged` equal to `firstSeen`, read it as "in or before 70245". See `known-limitations.md` for what history exists and what is missing.
 
 ## `data` for spells
 
@@ -82,4 +82,4 @@ Change paths are dotted with `[n]` list indexes; `null` on either side means "de
 
 ## `state.json`
 
-`version`, `build`, `hotfixPush` (latest ingested); `baselineBuild`/`baselinePush`; `schema` (column list per table, used for the schema-change guard); `scan` (`hotfixSummary`, `lockedRows` per table, when a scan log was supplied); `builds` (one entry per ingest with add/change/remove counts, used for the sanity check in AGENTS.md).
+`version`, `build`, `hotfixPush` (latest ingested); `baselineBuild`/`baselinePush`; `schema` (column list per table, used for the schema-change guard); `scan` (latest ingest only: `hotfixSummary`, `lockedRows` per table, `hotfixCacheSha256` of the Raidbots cache, which `builds.py check` compares against); `builds` (one entry per ingest: version, push, add/change/remove counts, hotfix summary; the ledger of what was ingested and the basis for the sanity check in AGENTS.md).
