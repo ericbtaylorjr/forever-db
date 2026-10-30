@@ -16,7 +16,7 @@ every 3 h (GitHub Action)            you, manually
 
 - **What counts as "new":** the US version service reports a different `wowf` build than `data/state.json`, **or** Raidbots' mirror of the live `DBCache.bin` has a different SHA-256 than the one stored at the last ingest (new hotfix push). See `pipeline/builds.py check`.
 - **Missed a build?** The check compares with the *latest* state, so a delayed run still picks up the newest build and ingests it; changes from skipped intermediate builds are folded into that one version (history can't be inserted out of order). Running every 3 h keeps this rare. Manual trigger: Actions → *Update data* → *Run workflow* (tick *force* to scan even when nothing looks new).
-- **Routine PRs merge themselves** (squash, auto-merge; this needs *Allow auto-merge* enabled in the repo settings, otherwise the PR just waits for you to merge it). If the ingest is flagged (see below) the PR is labelled `needs-review` and waits for a person.
+- **Routine PRs merge themselves, and the site redeploys.** An unflagged update is merged straight away (squash, branch deleted) and the workflow then starts the *Site* workflow itself: merges made with the workflow's token do not trigger other workflows, so without that explicit start the site would never redeploy. A PR flagged `needs-review` is left open for a person; after merging it by hand, run *Site* from the Actions tab (a normal merge by you triggers it automatically). Required once: Settings → Actions → General → *Allow GitHub Actions to create and approve pull requests*. If a branch protection rule blocks the merge, the PR stays open and the run says so.
 
 ## Sources and why they matter
 

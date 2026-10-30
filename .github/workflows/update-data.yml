@@ -13,6 +13,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write   # to start the Site workflow after merging (see the last step)
 
 concurrency:
   group: update-data
@@ -74,12 +75,27 @@ jobs:
           git checkout -b "$BRANCH"
           git add data
           git commit -m "data: $VERSION"
-          git push -u origin "$BRANCH"
+          # The branch is the bot's own; a re-run after a failure replaces it.
+          git push --force -u origin "$BRANCH"
           LABEL=""
           if [ "${{ steps.scan.outputs.review }}" = "true" ]; then
             gh label create needs-review --color d93f0b --description "Ingest looks like a tool/schema problem" 2>/dev/null || true
             LABEL="--label needs-review"
           fi
-          gh pr create --base main --head "$BRANCH" --title "data: $VERSION" --body-file "$SUMMARY" $LABEL
-          # Routine updates merge themselves; anything flagged for review waits for a person.
-          [ -z "$LABEL" ] && gh pr merge "$BRANCH" --squash --auto || true
+          if ! PR_URL="$(gh pr create --base main --head "$BRANCH" --title "data: $VERSION" --body-file "$SUMMARY" $LABEL)"; then
+            echo "::error::Could not open the pull request. If it says Actions may not create pull requests, enable Settings > Actions > General > 'Allow GitHub Actions to create and approve pull requests'."
+            exit 1
+          fi
+          echo "Opened $PR_URL"
+          if [ -n "$LABEL" ]; then
+            echo "::notice::Flagged for review, so it was left open: $PR_URL"
+            exit 0
+          fi
+          # Routine update: merge now. (Not `--auto`: with nothing for GitHub to wait on, it refuses auto-merge.)
+          if gh pr merge "$BRANCH" --squash --delete-branch; then
+            # A merge made with the workflow's token does not start other workflows, so the site build/deploy is
+            # started explicitly (workflow_dispatch is the one trigger that is allowed).
+            gh workflow run site.yml --ref main
+          else
+            echo "::warning::Could not merge $PR_URL (a branch protection rule?). It stays open: merge it by hand, then run the Site workflow."
+          fi

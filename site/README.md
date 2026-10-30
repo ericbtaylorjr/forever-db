@@ -35,7 +35,7 @@ npm run build                      # dist/
 
 ## Publishing
 
-`.github/workflows/site.yml` builds and tests on every push. It deploys to GitHub Pages only when the repository variable `PAGES_ENABLED` is `true` **and** Settings → Pages → Source is "GitHub Actions". Until then nothing is published. Data PRs from the update workflow merge to `main` and redeploy the site automatically once enabled.
+`.github/workflows/site.yml` builds and tests on every push. It deploys to GitHub Pages only when the repository variable `PAGES_ENABLED` is `true` **and** Settings → Pages → Source is "GitHub Actions". Until then nothing is published. The update workflow merges routine data PRs and then starts this workflow itself (a merge made with the workflow's own token does not trigger it), so the site redeploys after each update once enabled. A flagged (`needs-review`) PR you merge by hand triggers it normally.
 
 ## Known limits
 
