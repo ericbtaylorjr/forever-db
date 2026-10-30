@@ -14,7 +14,7 @@ npm run build                      # dist/
 
 | Path | Purpose |
 |---|---|
-| `src/pages/` | `Home`, `Browse` (items, spells), `Entity` (item and spell detail), `Builds`, `Build` |
+| `src/pages/` | `Home` (counts, newly discovered and recently updated items and spells from the last three versions), `Browse` (items, spells), `Entity` (item and spell detail), `Builds`, `Build` |
 | `src/components/` | `FilterPanels` (shared by browse and build pages), `History` (timeline and compare), `VirtualTable`, `ui` (icons, badges, controls) |
 | `src/lib/data.ts` | loads and types the files `pipeline/site_data.py` writes (`../docs/site-data.md`) |
 | `src/lib/history.ts` | rebuilds an entry as it was in any past version from its change history; verified against real past scans (`../pipeline/tests/check_history_roundtrip.py`) |

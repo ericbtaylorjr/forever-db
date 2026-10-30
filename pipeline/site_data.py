@@ -53,6 +53,25 @@ def write_json(path, value):
     path.write_text(json.dumps(value, separators=(",", ":"), ensure_ascii=False, sort_keys=True), encoding="utf-8")
 
 
+def change_priority(path):
+    """Lower = more informative to a reader. Build files keep only the first few changed fields per entry, so the ones a
+    person cares about (a stat, the rendered text, a cast time) must come before raw templates and database columns."""
+    top = re.split(r"[.\[]", path, maxsplit=1)[0]
+    if top in ("name", "quality", "itemLevel", "requiredLevel", "inventoryType") or path.startswith(("computed.stats", "computed.armor", "computed.weapon")):
+        return 0
+    if path.startswith("computed.tooltip"):
+        return 1
+    if top in ("castTimeMs", "durationMs", "durationPerLevelMs", "schoolMask", "range"):
+        return 2
+    if top == "effects" or path.startswith(("related.SpellEffect", "related.SpellPower", "related.SpellCooldowns")):
+        return 3
+    if top == "related":
+        return 4
+    if top in ("description", "auraDescription", "subtext"):
+        return 5
+    return 6
+
+
 def clip(value):
     if isinstance(value, str) and len(value) > MAX_VALUE_CHARS:
         return value[:MAX_VALUE_CHARS] + "…"
@@ -206,7 +225,8 @@ def build(out_dir):
                 changes = ev.get("changes") or {}
                 if changes:
                     row["n"] = len(changes)
-                    row["c"] = [[path, clip(old), clip(new)] for path, (old, new) in list(changes.items())[:MAX_CHANGES_PER_ENTRY]]
+                    ranked = sorted(changes.items(), key=lambda kv: (change_priority(kv[0]), kv[0]))
+                    row["c"] = [[path, clip(old), clip(new)] for path, (old, new) in ranked[:MAX_CHANGES_PER_ENTRY]]
                 changes_by_version[versions.of(ev)].append(row)
     version_meta = []
     for i, entry in enumerate(versions.entries):

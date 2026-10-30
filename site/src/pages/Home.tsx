@@ -1,19 +1,71 @@
-import { getItems, getMeta, getSpells } from '../lib/data.ts';
+import { getBuild, getItems, getMeta, getSpells, type ItemIndex, type Meta, type SpellIndex } from '../lib/data.ts';
+import { fieldLabel, valueLabel } from '../lib/describe.ts';
+import { recentUpdates, type RecentChange } from '../lib/recent.ts';
 import { qualityColor, shortVersion } from '../lib/format.ts';
 import { toHash } from '../lib/router.ts';
 import { useAsync } from '../lib/useAsync.ts';
 import { Chip, ErrorBox, GameIcon, Loading, Panel } from '../components/ui.tsx';
 
+const SHOWN = 12;
+
+/** One line of what changed, e.g. "Item level: 23 → 24", plus how many more fields changed. */
+function ChangeSummary({ ch, meta }: { ch: RecentChange['ch']; meta: Meta }) {
+  const first = ch.c?.[0];
+  if (!first) return null;
+  const [path, a, b] = first;
+  const more = (ch.n ?? 1) - 1;
+  return (
+    <span className="truncate text-xs text-mute">
+      {fieldLabel(path, meta.statNames)}: <span className="text-bad">{valueLabel(path, a, meta.statNames)}</span> → <span className="text-good">{valueLabel(path, b, meta.statNames)}</span>
+      {more > 0 ? ` (+${more} more)` : ''}
+    </span>
+  );
+}
+
+function UpdatedList({ kind, updates: all, items, spells, meta }: { kind: 'i' | 's'; updates: RecentChange[]; items: ItemIndex; spells: SpellIndex; meta: Meta }) {
+  // Edits to still-encrypted entries are not shown here: a hidden entry changing says nothing a reader can use.
+  const updates = all.filter(({ ch }) => !(kind === 'i' ? items.byId.get(ch.id) : spells.byId.get(ch.id))?.enc);
+  if (updates.length === 0) return <p className="text-mute">Nothing was edited in the last few versions.</p>;
+  return (
+    <ul className="space-y-2 text-sm">
+      {updates.slice(0, SHOWN).map(({ v, ch }) => {
+        const row = kind === 'i' ? items.byId.get(ch.id) : spells.byId.get(ch.id);
+        if (!row) return null;
+        const icon = kind === 'i' ? items.icons[row.icon] : spells.icons[row.icon];
+        return (
+          <li key={ch.id} className="flex items-start gap-2">
+            <GameIcon name={icon} size={24} />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="flex flex-wrap items-center gap-2">
+                <a href={toHash([kind === 'i' ? 'item' : 'spell', String(ch.id)])} style={kind === 'i' ? { color: qualityColor((row as ItemIndex['rows'][number]).quality) } : undefined}>
+                  {row.enc ? `Encrypted ${kind === 'i' ? 'item' : 'spell'} #${ch.id}` : row.name}
+                </a>
+                <Chip tone="accent">{shortVersion(meta.versions[v])}</Chip>
+              </span>
+              <ChangeSummary ch={ch} meta={meta} />
+            </div>
+          </li>
+        );
+      })}
+      {updates.length > SHOWN && <li className="text-xs text-mute">…and {updates.length - SHOWN} more</li>}
+    </ul>
+  );
+}
+
 export function HomePage() {
   const meta = useAsync(getMeta, []);
   const items = useAsync(getItems, []);
   const spells = useAsync(getSpells, []);
-  const error = meta.error || items.error || spells.error;
+  const recentFrom = meta.data ? Math.max(1, meta.data.latest - 2) : 1; // the last three versions
+  const builds = useAsync(
+    () => (meta.data ? Promise.all(Array.from({ length: meta.data.latest - recentFrom + 1 }, (_, k) => getBuild(recentFrom + k).then((f) => ({ v: recentFrom + k, changes: f.changes })))) : Promise.resolve([])),
+    [meta.data],
+  );
+  const error = meta.error || items.error || spells.error || builds.error;
   if (error) return <ErrorBox error={error} />;
-  if (!meta.data || !items.data || !spells.data) return <Loading />;
+  if (!meta.data || !items.data || !spells.data || !builds.data) return <Loading />;
   const m = meta.data, latest = m.versions[m.latest];
   const total = (k: 'items' | 'spells') => latest.discovery?.[k];
-  const recentFrom = Math.max(1, m.latest - 2);
   const newItems = items.data.rows.filter((r) => !r.enc && r.disc >= recentFrom).sort((a, b) => b.disc - a.disc || a.id - b.id);
   const newSpells = spells.data.rows.filter((r) => !r.enc && r.disc >= recentFrom).sort((a, b) => b.disc - a.disc || a.id - b.id);
 
@@ -47,7 +99,7 @@ export function HomePage() {
         </a>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title={`Recently discovered items (since ${m.versions[recentFrom].label})`} actions={<a href={toHash(['items'], { view: 'discovered', discSince: String(recentFrom), sort: 'changed', dir: 'desc' })} className="text-xs">See all</a>}>
+        <Panel title={`Newly discovered items (since ${m.versions[recentFrom].label})`} actions={<a href={toHash(['items'], { view: 'discovered', discSince: String(recentFrom), sort: 'changed', dir: 'desc' })} className="text-xs">See all</a>}>
           {newItems.length === 0 ? <p className="text-mute">No items were revealed in the last few versions.</p> : (
             <ul className="space-y-1.5 text-sm">
               {newItems.slice(0, 12).map((r) => (
@@ -61,7 +113,7 @@ export function HomePage() {
             </ul>
           )}
         </Panel>
-        <Panel title={`Recently discovered spells (since ${m.versions[recentFrom].label})`} actions={<a href={toHash(['spells'], { view: 'discovered', discSince: String(recentFrom), sort: 'changed', dir: 'desc' })} className="text-xs">See all</a>}>
+        <Panel title={`Newly discovered spells (since ${m.versions[recentFrom].label})`} actions={<a href={toHash(['spells'], { view: 'discovered', discSince: String(recentFrom), sort: 'changed', dir: 'desc' })} className="text-xs">See all</a>}>
           {newSpells.length === 0 ? <p className="text-mute">No spells were revealed in the last few versions.</p> : (
             <ul className="space-y-1.5 text-sm">
               {newSpells.slice(0, 12).map((r) => (
@@ -73,6 +125,14 @@ export function HomePage() {
               ))}
             </ul>
           )}
+        </Panel>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title={`Recently updated items (since ${m.versions[recentFrom].label})`} actions={<a href={toHash(['build', String(m.latest)], { k: 'i', ev: 'changed' })} className="text-xs">See all in {shortVersion(latest)}</a>}>
+          <UpdatedList kind="i" updates={recentUpdates(builds.data, 'i')} items={items.data} spells={spells.data} meta={m} />
+        </Panel>
+        <Panel title={`Recently updated spells (since ${m.versions[recentFrom].label})`} actions={<a href={toHash(['build', String(m.latest)], { k: 's', ev: 'changed' })} className="text-xs">See all in {shortVersion(latest)}</a>}>
+          <UpdatedList kind="s" updates={recentUpdates(builds.data, 's')} items={items.data} spells={spells.data} meta={m} />
         </Panel>
       </div>
       <Panel title="How to read this site">

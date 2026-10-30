@@ -1,4 +1,4 @@
-import { refName, schoolNames, slotName, statName, QUALITY_NAMES } from './format.ts';
+import { AREA_LABELS, refName, schoolNames, slotName, statName, QUALITY_NAMES } from './format.ts';
 
 /** Turn a flattened record path and its value into something a person can read in the history and compare views. */
 
@@ -17,7 +17,9 @@ export function fieldLabel(path: string, stats: Record<string, string>): string 
   if (m) return `Item effect ${Number(m[1]) + 1} › ${m[2]}`;
   m = path.match(/^(sparse|item)\.(\w+)$/);
   if (m) return m[2];
-  return path;
+  if (path === 'description') return 'Description (template)';
+  if (path === 'auraDescription') return 'Aura description (template)';
+  return AREA_LABELS[path] ?? path;
 }
 
 export function valueLabel(path: string, value: unknown, _stats: Record<string, string>): string {

@@ -75,6 +75,21 @@ class SiteDataTest(unittest.TestCase):
         flags = {r[0]: r[index["cols"].index("test")] for r in index["rows"]}
         self.assertEqual(flags, {1: 0, 2: 1, 3: 1})
 
+    def test_build_file_keeps_the_most_informative_changes_first(self):
+        # 12 raw database columns plus one stat-relevant change: the item level must lead and survive the cap of 8.
+        many = {f"Spare{i}": 1 for i in range(12)}
+        self.assertLess(site_data.change_priority("itemLevel"), site_data.change_priority("description"))
+        self.assertLess(site_data.change_priority("computed.stats.7"), site_data.change_priority("computed.tooltip.description"))
+        self.assertLess(site_data.change_priority("computed.tooltip.description"), site_data.change_priority("related.SpellEffect[0].EffectBasePointsF"))
+        self.assertLess(site_data.change_priority("related.SpellMisc[0].SchoolMask"), site_data.change_priority("description"))
+        self.assertLess(site_data.change_priority("description"), site_data.change_priority("sparse.Spare0"))
+        self.assertEqual(len(many), 12)
+        self.ingest(self.db("a.db", version="1.60.1.100", items={1: ("Sword", 10, 13)}))
+        self.ingest(self.db("b.db", version="1.60.1.200", items={1: ("Sword", 11, 13)}))
+        site_data.build(self.out)
+        change = json.loads((self.out / "builds" / "1.json").read_text())["changes"][0]
+        self.assertEqual(change["c"][0][0], "itemLevel")
+
     def test_derived_areas_are_not_listed(self):
         self.ingest(self.db("a.db", version="1.60.1.100", items={1: dict(ClassID=2, SubclassID=7, InventoryType=13, OverallQualityID=1)}))
         self.ingest(self.db("b.db", version="1.60.1.200", items={1: dict(ClassID=2, SubclassID=7, InventoryType=13, OverallQualityID=3)}))

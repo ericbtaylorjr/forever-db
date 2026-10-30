@@ -11,6 +11,8 @@
 
 Versions are integers everywhere (index in `meta.versions`); `-1` = none. Row columns are named in `cols`, so the UI never depends on positions. Index rows carry what the filters need (quality, item level, class/subclass/slot, gear flag, armor, dps, stat values, set; school, cast time, duration, tags, text status), `enc` (1 = encrypted) and `test` (1 = the name looks like a test or placeholder item: `TEST_NAME` in `site_data.py`, a heuristic for the site's "hide test items" filter that never removes anything).
 
+In a build file the changed fields in `c` are ordered by how informative they are to a reader, not alphabetically (`change_priority` in `site_data.py`: names, levels, stats, armor and weapon first; then rendered text; then cast time/duration/school; then effects; then other spell data; then raw description templates and database columns last), and only the first 8 are kept, so `c[0]` is the best one-line summary. `n` is the full count.
+
 Build-file rows for `removed` events also carry the entity's last `nm` (name) and `ic` (icon name), since removed entities are not in the index. Areas that only restate another (`className`, `subclassName`, `qualityName`) are left out of the `a` lists.
 
 Why shards: the index answers browsing and filtering without loading details; a detail page loads one shard. Adding fields to an index row is cheap; adding to `d` is free (it is just `data`).
