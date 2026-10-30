@@ -35,6 +35,12 @@ if ! grep -q -- '--cdn-pin' "$FOREVER_REPO/tools/db2tool/main.go"; then
   git -C "$FOREVER_REPO" apply "$HERE/scan/patches/db2tool-cdn-pin.patch"
 fi
 
+# The shield block table is not in the game files; we vendor wowsims' copy. Stop if their pinned copy moved.
+if ! cmp -s "$HERE/scan/gametables/ShieldBlockRegular.txt" "$FOREVER_REPO/tools/database/dbc/GameTables/ShieldBlockRegular.txt"; then
+  echo "scan/gametables/ShieldBlockRegular.txt differs from the pinned wowsims copy; see scan/gametables/README.md" >&2
+  exit 1
+fi
+
 # db2tool resolves paths relative to its own checkout, so the settings live there.
 SETTINGS="$FOREVER_REPO/tools/database/forever-db-settings.json"
 sed "s|__WOW_DIR__|$WOW_DIR|" "$HERE/scan/settings.template.json" > "$SETTINGS"

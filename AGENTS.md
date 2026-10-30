@@ -8,12 +8,14 @@ Dataset (and, later, browser) of every spell, item and piece of gear in WoW **Fo
 |---|---|
 | `data/spells.jsonl`, `data/items.jsonl` | Current record per entity, one JSON object per line, sorted by `id`. **Generated – never hand-edit.** |
 | `data/history/*.jsonl` | Per-entity change events (field-level old→new). Generated. |
+| `data/stat-names.json` | ITEM_MOD id → name for `computed.stats`. Generated. |
 | `data/state.json` | Last ingested build + hotfix push, hotfix-cache hash, per-table column layout, locked-row counts, per-ingest log. Generated. |
 | `pipeline/build_data.py` | Reads a db2tool SQLite dump, joins tables into records, diffs against `data/`, writes `data/`. Python stdlib only. |
 | `pipeline/builds.py` | `check` (is there a new build/hotfix?) and `list` (historical builds + CDN config hashes from wago.tools). |
 | `pipeline/spikes/` | Throwaway prototypes (not production code), each pointing at the doc that explains it. |
-| `pipeline/tests/` | Unit tests on synthetic dumps and stubbed network. |
+| `pipeline/tests/` | Unit tests on synthetic dumps and stubbed network, plus a golden set of real items (`golden_items.json`, regenerated with `make_golden.py`). |
 | `scan/settings.template.json` | The pinned list of DB2 tables we extract. We own this list (not wowsims). |
+| `scan/gametables/` | Vendored `ShieldBlockRegular.txt` (not in the game files); see its README. |
 | `scan/forever-ref.txt`, `scan/patches/` | Pinned wowsims/forever commit, and our small patch to db2tool (historical-build pinning). |
 | `scripts/scan.sh` | End to end: run `db2tool` → ingest. Modes: local install, `--cdn` (live), `--pin` (historical). |
 | `scripts/backfill.sh` | Destructive: rebuild `data/` from historical builds + live. |
@@ -45,7 +47,8 @@ python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would cha
 8. **Commit what you scan with `--cdn`, not the local install.** The local `DBCache.bin` lags Raidbots' mirror. Never mix: an ingest that silently loses its hotfix overlay would record every hotfixed entity as changed (the ingest refuses this).
 9. **Pin, don't float, the extraction tool.** `scan/forever-ref.txt` fixes the wowsims/forever commit. Bump it deliberately and review the first ingest after.
 10. **Keep dependencies on the latest stable release, explicitly pinned** (policy, versions and the upgrade routine are in `docs/update-runbook.md` → Dependencies). GitHub Actions are pinned by commit SHA; do not use floating tags like `@v4` or `latest`.
-11. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
+11. **Item stats are derived, equip-effect stats are not merged.** `computed` comes from the budget tables; effects stay in `effects`. If you change the formula, the golden test must still pass and `data/` must be rebuilt (`scripts/backfill.sh`). Read `docs/item-stats-spike.md` first.
+12. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
 
 ## Conventions
 
@@ -58,5 +61,5 @@ python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would cha
 ## Project status (keep current)
 
 - Done: extraction via db2tool, normalized spells/items, field-level history, history for builds 70245 → 70685 (+ hotfix push 113511), update check, scheduled workflow (written, not yet run on GitHub).
-- Done: item-stats spike (`docs/item-stats-spike.md`): formula proven against wowsims' output, 1–2 days to put in the pipeline.
-- Next: confirm the first real auto-update PR; productionize item stats; spell tooltip rendering; "player-usable spell" filter; the browser UI (GitHub Pages). Open questions live in `docs/known-limitations.md`.
+- Done: item stats computed in the pipeline (`computed`, validated against wowsims' output: 5,200/5,225 items, 801/801 weapons), history events carry `areas`, effects ordered by game slot.
+- Next: confirm the first real auto-update PR (the pushed workflow predates the stats change, push first); spell tooltip rendering; "player-usable spell" filter; the browser UI (GitHub Pages). Open questions live in `docs/known-limitations.md`.

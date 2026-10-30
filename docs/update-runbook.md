@@ -42,9 +42,15 @@ Setup: Go ≥ 1.25 and Python ≥ 3.10 (stdlib only). `scan.sh` needs network fo
 
 `scan.sh` with no flags scans the local install (`WOW_DIR`, default `/mnt/c/Program Files (x86)/World of Warcraft`; the CASC archive and `.build.info` sit one level above `_forever_/`, shared with other clients). Use it when debugging or when the CDN is unreachable.
 
+## Stats and the vendored table
+
+Item stats are computed during the ingest from the budget tables in the scan. The only non-scanned input is `scan/gametables/ShieldBlockRegular.txt` (vendored from wowsims; see its README). When you bump `scan/forever-ref.txt`, `scan.sh` compares it with the new wowsims copy and stops if they differ; copy the new file in and rebuild (`scripts/backfill.sh`) as the README says.
+
+If you change the stat rules, run the unit tests (the golden set must still pass), then rebuild `data/` with `scripts/backfill.sh` and commit it as `data: rebuild history`. To regenerate the golden items (only when the formula or the reference intentionally changes): `python3 pipeline/tests/make_golden.py .scan/scan.db $FOREVER_REPO/assets/database/db.json`.
+
 ## Verifying an ingest
 
-The ingest prints and saves (`.scan/summary.md`) added/changed/removed/unchanged per kind and, automatically, flags it **Needs review** when more than 10 % of entities changed or 2 % were removed. That threshold is a tripwire for tool/schema problems, not a statement about normal updates. Typical real updates in the history so far: tens to a few hundred changed entities, and a few hundred new items/spells when a hotfix adds content.
+The ingest prints and saves (`.scan/summary.md`) added/changed/removed/unchanged per kind and, automatically, flags it **Needs review** when more than 10 % of entities changed or 2 % were removed. That threshold is a tripwire for tool/schema problems, not a statement about normal updates. Each changed event also carries `areas` (e.g. `computed`, `effects`, `related`), which helps tell a stat change from an effect change at a glance. Typical real updates in the history so far: tens to a few hundred changed entities, and a few hundred new items/spells when a hotfix adds content.
 
 Also check:
 1. `Hotfixes: build N up to push P` – not `none applied`. (The ingest refuses a no-hotfix scan after a hotfixed one unless `--allow-no-hotfixes`.)

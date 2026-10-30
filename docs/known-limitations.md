@@ -20,7 +20,7 @@ Keep this current. Add an entry whenever you discover a data quirk.
 
 ## Derived values not computed yet
 
-- **Item stat values.** Items carry only raw allocation (`StatModifier_bonusStat`, `StatPercentEditor`). The spike (`docs/item-stats-spike.md`) reproduced wowsims' numbers on 5,200 of 5,225 comparable items and all weapon damage and armor, so the approach is proven but **not yet in the pipeline**. Weapon DPS and armor have the same status.
+- **Item stats are computed (`computed`) but incomplete.** Not included: stats granted by equip-effect spells (they stay in `effects`), random-suffix stats, Poor/Common items (no budget column), and 25 items where wowsims' output differs (list in `docs/item-stats-spike.md`). About 14.5k items have no independent reference; spot-check before trusting rare edge cases. Block value depends on a vendored table that does not follow game hotfixes (`scan/gametables/README.md`).
 - **Tooltip text.** `description`/`auraDescription` are raw templates (`$s1`, `${$1279976m1*$d}`, `$?a14748[...]`). Rendering them needs a resolver using `SpellEffect` values; `wowsims/forever` has a `tools/tooltip` directory that may be relevant (not reviewed).
 - **Icons.** Only `iconFileDataID` is stored; names come from db2tool's `listfile.csv` (`interface/icons/<name>.blp`) and must be resolved when the site is built. Image files themselves are not extracted.
 

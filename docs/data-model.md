@@ -10,6 +10,7 @@ Output contract of `pipeline/build_data.py`. The future browser UI should depend
 | `data/items.jsonl` | One line per item (gear is the subset with `data.isGear == true`) |
 | `data/history/spells.jsonl`, `data/history/items.jsonl` | One line per entity that has had at least one event since the baseline |
 | `data/state.json` | Ingest state (see below) |
+| `data/stat-names.json` | ITEM_MOD id → display name, for `computed.stats` |
 
 All JSONL is sorted by `id`, keys sorted, compact.
 
@@ -58,12 +59,27 @@ Scalars (all optional; absent = default):
 | `nameDescription` | `ItemNameDescription` (e.g. "Raid Unique (3)") |
 | `iconFileDataID` | `Item.IconFileDataID` |
 | `itemSet` | `{id, name}` from `ItemSet` |
-| `effects` | `ItemEffect` rows linked via `ItemXItemEffect` (`SpellID` links to spells) |
+| `effects` | `ItemEffect` rows linked via `ItemXItemEffect`, ordered by the game's slot (`LegacySlotIndex`), then spell. `SpellID` links to the spell entity, which has its own history. **Equip-effect stats are not folded into `computed`.** |
+| `computed` | Stats the client shows, derived from the budget tables (see below) |
 | `bonusTrees` | `ItemXBonusTree.ItemBonusTreeID`, sorted |
 | `sparse` | remaining `ItemSparse` columns (stats, prices, flags, bonding, delay, sockets, …) |
 | `item` | remaining `Item` columns |
 
-Item stats are **raw**: `sparse.StatModifier_bonusStat[i]` is the stat type and `sparse.StatPercentEditor[i]` its allocation. Resolved stat values are not computed yet (see known limitations).
+### `computed` (items)
+
+```jsonc
+"computed": {
+  "stats":  {"7": 50, "5": 13},        // ITEM_MOD id -> value; names in data/stat-names.json
+  "armor":  55,                         // base armor (armor class only)
+  "weapon": {"min": 15, "max": 25, "dps": 10.0, "speed": 2.0}   // weapons only
+}
+```
+
+Absent keys mean none. Stat ids are the game's raw ITEM_MOD numbers (`data/stat-names.json`; unknown ids appear as numbers only). Some ids overlap by design: `45` spell power means both spell damage and healing, `124` all resistances, and hit/crit/haste each exist as melee, ranged, spell and combined ids. The UI should group them. Bonus armor is `50`, shield block value `48`, caster-weapon spell power is added to `45`/`41`/`42`.
+
+Rules and provenance: `docs/item-stats-spike.md`. Raw inputs remain in `sparse` (`StatModifier_bonusStat`, `StatPercentEditor`), so a change to a stat allocation shows in both `sparse` and `computed`; a hotfix to a budget table shows only in `computed`.
+
+**Not in `computed`:** stats granted by equip-effect spells (many trinkets/runes), random-suffix stats, and anything on items without a quality ≥ Uncommon budget. Block value uses a vendored table (`scan/gametables/README.md`).
 
 An item exists in the dataset iff it has an `ItemSparse` row. `Item` has ~12k more rows (shared with other clients) that Forever does not use.
 
@@ -71,14 +87,14 @@ An item exists in the dataset iff it has an `ItemSparse` row. `Item` has ~12k mo
 
 ```jsonc
 {"id": 543, "events": [
-  {"build": 70700, "push": 113500, "type": "changed",
+  {"build": 70700, "push": 113500, "type": "changed", "areas": ["related"],
    "changes": {"description": ["old", "new"], "related.SpellEffect[1].EffectBasePointsF": [162.0, 99.0]}},
   {"build": 70700, "push": 113500, "type": "removed"},
   {"build": 70701, "push": 113510, "type": "added"}   // appeared after the baseline
 ]}
 ```
 
-Change paths are dotted with `[n]` list indexes; `null` on either side means "default/absent". The baseline ingest writes no events. Reconstruct an old version of an entity by applying events in reverse to the current `data`; side-by-side comparison of two versions uses the same events.
+`areas` lists the top-level sections of the record that changed (items: `computed`, `effects`, `sparse`, `item`, `name`, …; spells: `related`, `description`, `name`, …). Use it to tell *what kind* of change an event was, e.g. an item's `effects` changed but not its `computed` stats. Effects have their own history too: the spell an effect points to is a separate spell entity. Change paths are dotted with `[n]` list indexes; `null` on either side means "default/absent". The baseline ingest writes no events. Reconstruct an old version of an entity by applying events in reverse to the current `data`; side-by-side comparison of two versions uses the same events.
 
 ## `state.json`
 

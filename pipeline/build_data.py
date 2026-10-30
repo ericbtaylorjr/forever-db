@@ -12,6 +12,7 @@ the full update procedure. Python stdlib only.
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import sqlite3
@@ -36,6 +37,33 @@ GEAR_CLASSES = {2, 4}
 # An ingest changing/removing more than this share of entities is flagged for human review.
 MAX_CHANGED_RATIO = 0.10
 MAX_REMOVED_RATIO = 0.02
+
+# ITEM_MOD ids (ItemSparse.StatModifier_bonusStat) as the game numbers them; written to data/stat-names.json for the UI.
+STAT_NAMES = {
+    0: "Mana", 1: "Health", 3: "Agility", 4: "Strength", 5: "Intellect", 6: "Spirit", 7: "Stamina",
+    12: "Defense rating", 13: "Dodge rating", 14: "Parry rating", 15: "Block rating",
+    16: "Melee hit rating", 17: "Ranged hit rating", 18: "Spell hit rating",
+    19: "Melee crit rating", 20: "Ranged crit rating", 21: "Spell crit rating",
+    28: "Melee haste rating", 29: "Ranged haste rating", 30: "Spell haste rating",
+    31: "Hit rating", 32: "Crit rating", 35: "Resilience rating", 36: "Haste rating", 37: "Expertise rating",
+    38: "Attack power", 39: "Ranged attack power", 40: "Feral attack power",
+    41: "Healing power", 42: "Spell damage", 43: "Mana per 5 sec", 44: "Armor penetration rating",
+    45: "Spell power (damage and healing)", 46: "Health per 5 sec", 47: "Spell penetration", 48: "Block value",
+    50: "Bonus armor", 51: "Fire resistance", 52: "Frost resistance", 53: "Holy resistance",
+    54: "Shadow resistance", 55: "Nature resistance", 56: "Arcane resistance",
+    83: "Weapon damage", 84: "Holy damage", 85: "Fire damage", 86: "Nature damage", 87: "Frost damage",
+    88: "Shadow damage", 89: "Arcane damage", 124: "All resistances",
+}
+# Item stat budgets; see docs/item-stats-spike.md for where each rule comes from.
+CLASS_WEAPON, CLASS_ARMOR, SUBCLASS_SHIELD = 2, 4, 6
+FLAG1_CASTER_WEAPON = 0x200
+FLAG4_REDUCED_CASTER_DPS, FLAG4_CASTER_SPELL_POWER, FLAG4_CASTER_HEALING_POWER = 0x100, 0x200, 0x400
+ARMOR_SLOTS = {1, 3, 5, 6, 7, 8, 9, 10, 16, 20}  # head, shoulders, chest, waist, legs, feet, wrists, hands, cloak, robe
+INV_ROBE, INV_CHEST = 20, 5
+MOD_BLOCK_VALUE, MOD_BONUS_ARMOR, MOD_SPELL_POWER, MOD_HEALING, MOD_SPELL_DAMAGE = 48, 50, 45, 41, 42
+GAMETABLE_FILES = ("ShieldBlockRegular.txt",)
+DAMAGE_TABLES = ("ItemDamageOneHand", "ItemDamageOneHandCaster", "ItemDamageTwoHand", "ItemDamageTwoHandCaster",
+                 "ItemDamageRanged", "ItemDamageThrown", "ItemDamageWand")
 
 _EXPANDED = re.compile(r"^(.*)_(\d+)$")
 
@@ -134,7 +162,136 @@ def build_spells(src):
     return out
 
 
-def build_items(src):
+def rnd(x):
+    """Round half up, as the client does (Go's math.Round); Python's round() is banker's."""
+    return math.floor(x + 0.5)
+
+
+def budget_slot(cls, sub, inv):
+    """Column of RandPropPoints an item's stats are budgeted from; -1 = none."""
+    if cls == CLASS_WEAPON:
+        if sub in (1, 5, 6, 8, 10):  # two-hand axe/mace/polearm/sword, staff
+            return 0
+        if sub in (2, 3, 16, 18, 19):  # bow, gun, thrown, crossbow, wand
+            return 4
+        return 3
+    if cls == CLASS_ARMOR:
+        if inv in (1, 5, 7, 20):
+            return 0
+        if inv in (3, 6, 8, 10, 12):
+            return 1
+        if inv in (2, 9, 11, 14, 16, 22, 23, 28):
+            return 2
+    return -1
+
+
+def damage_table(inv, sub, flags1):
+    caster = bool(flags1 & FLAG1_CASTER_WEAPON)
+    if inv in (13, 21, 22):
+        return "ItemDamageOneHandCaster" if caster else "ItemDamageOneHand"
+    if inv == 17:
+        return "ItemDamageTwoHandCaster" if caster else "ItemDamageTwoHand"
+    if inv in (15, 25, 26):
+        return {2: "ItemDamageRanged", 3: "ItemDamageRanged", 18: "ItemDamageRanged", 16: "ItemDamageThrown", 19: "ItemDamageWand"}.get(sub)
+    return None
+
+
+def read_gametable(directory, name):
+    """Rows of a tab-separated GameTable, keyed by its first (level) column."""
+    path = Path(directory) / name
+    if not path.exists():
+        sys.exit(f"Missing GameTable {path}; see scan/gametables/README.md.")
+    rows = {}
+    for line in path.read_text().splitlines()[1:]:
+        parts = line.split()
+        if parts and parts[0].isdigit():
+            rows[int(parts[0])] = [float(x) for x in parts[1:]]
+    return rows
+
+
+class StatTables:
+    """Level tables the item stat rules need. Missing DB2 tables abort: silently computing nothing would look like a mass change."""
+
+    def __init__(self, src, gametables):
+        need = ["RandPropPoints", "ItemArmorTotal", "ItemArmorQuality", "ItemArmorShield", "ArmorLocation", *DAMAGE_TABLES]
+        missing = [t for t in need if t not in src.tables]
+        if missing:
+            sys.exit(f"db2tool dump lacks tables needed for item stats: {', '.join(missing)} (scan/settings.template.json)")
+        self.budget = {r["ID"]: {2: r["Good"], 3: r["Superior"], 4: r["Epic"]} for r in src.rows("RandPropPoints")}
+        self.damage = {t: {r["ItemLevel"]: r["Quality"] for r in src.rows(t)} for t in DAMAGE_TABLES}
+        self.armor_total = {r["ItemLevel"]: r for r in src.rows("ItemArmorTotal")}
+        self.armor_quality = {r["ID"]: r["Qualitymod"] for r in src.rows("ItemArmorQuality")}
+        self.armor_shield = {r["ItemLevel"]: r["Quality"] for r in src.rows("ItemArmorShield")}
+        self.armor_location = {r["ID"]: [r["Clothmodifier"], r["Leathermodifier"], r["Chainmodifier"], r["Platemodifier"]]
+                               for r in src.rows("ArmorLocation")}
+        self.block = read_gametable(gametables, "ShieldBlockRegular.txt")
+
+
+def compute_item(sp, cls, sub, t):
+    """Stats, armor and weapon damage as the client shows them, from the budget tables.
+
+    Returns {} for items with nothing to show. Equip-effect stats are deliberately not folded in; they stay in `effects`."""
+    inv, q, ilvl = sp.get("InventoryType", 0), sp.get("OverallQualityID", 0), sp.get("ItemLevel", 0)
+    flags = list(sp.get("Flags") or []) + [0] * 5
+    stats = {}
+
+    slot = budget_slot(cls, sub, inv)
+    budget = t.budget[ilvl][min(q, 4)][slot] if slot >= 0 and q >= 2 and ilvl in t.budget else 0
+    for mod, alloc in zip(sp.get("StatModifier_bonusStat") or [], sp.get("StatPercentEditor") or []):
+        if mod >= 0 and alloc > 0 and budget > 0:
+            stats[mod] = stats.get(mod, 0) + rnd(alloc * budget * 0.0001)
+
+    armor = 0
+    if cls == CLASS_ARMOR and q <= 6:
+        if sub == SUBCLASS_SHIELD:
+            if ilvl in t.armor_shield:
+                armor = rnd(t.armor_shield[ilvl][q])
+        elif sub in (1, 2, 3, 4) and inv in ARMOR_SLOTS and ilvl in t.armor_total and ilvl in t.armor_quality:
+            total = t.armor_total[ilvl]
+            base = (total["Cloth"], total["Leather"], total["Mail"], total["Plate"])[sub - 1]
+            location = t.armor_location.get(INV_CHEST if inv == INV_ROBE else inv)
+            if location:
+                armor = rnd(base * t.armor_quality[ilvl][q] * location[sub - 1])
+    if cls == CLASS_ARMOR and sp.get("QualityModifier", 0) > 0:  # "green" bonus armor
+        stats[MOD_BONUS_ARMOR] = sp["QualityModifier"]
+    if cls == CLASS_ARMOR and sub == SUBCLASS_SHIELD and ilvl in t.block:
+        stats[MOD_BLOCK_VALUE] = stats.get(MOD_BLOCK_VALUE, 0) + t.block[ilvl][min(q, 6)]
+
+    # Caster weapons carry spell power that no stat slot states.
+    if flags[4] & (FLAG4_CASTER_SPELL_POWER | FLAG4_CASTER_HEALING_POWER) and ilvl in t.budget:
+        b = t.budget[ilvl][min(max(q, 2), 4)][0]
+        if flags[4] & FLAG4_CASTER_HEALING_POWER:
+            healing = 37600 * b // 10000
+            stats[MOD_HEALING] = stats.get(MOD_HEALING, 0) + healing
+            stats[MOD_SPELL_DAMAGE] = stats.get(MOD_SPELL_DAMAGE, 0) + healing // 3
+        else:
+            stats[MOD_SPELL_POWER] = stats.get(MOD_SPELL_POWER, 0) + 20000 * b // 10000
+
+    weapon = None
+    if cls == CLASS_WEAPON and sp.get("ItemDelay"):
+        table = damage_table(inv, sub, flags[1])
+        row = t.damage.get(table, {}).get(ilvl) if table else None
+        if row:
+            speed = sp["ItemDelay"] / 1000
+            dps = row[4 if q > 6 else q]
+            if flags[4] & FLAG4_REDUCED_CASTER_DPS:
+                dps *= (2 / 3) if inv in (13, 21, 22) else (29 / 39) if inv == 17 else 1
+            bonus, var = sp.get("QualityModifier", 0) * speed, sp.get("DmgVariance", 0)
+            low, high = dps * speed * (1 - var / 2) + bonus, dps * speed * (1 + var / 2) + bonus
+            weapon = {"min": math.floor(1 if low < 0 else low), "max": rnd(1 if high < 0 else high),
+                      "dps": norm(dps), "speed": norm(speed)}
+
+    computed = {}
+    if stats:
+        computed["stats"] = {str(k): norm(v) for k, v in sorted(stats.items())}
+    if armor:
+        computed["armor"] = armor
+    if weapon:
+        computed["weapon"] = weapon
+    return computed
+
+
+def build_items(src, gametables):
     item = {r["ID"]: r for r in src.rows("Item")}
     classes = {r["ClassID"]: r["ClassName_lang"] for r in src.rows("ItemClass")}
     subclasses = {(r["ClassID"], r["SubClassID"]): r["DisplayName_lang"] for r in src.rows("ItemSubClass")}
@@ -143,6 +300,7 @@ def build_items(src):
     item_effects = src.by_key("ItemXItemEffect", "ItemID")
     bonus_trees = src.by_key("ItemXBonusTree", "ItemID")
     sets = {r["ID"]: r for r in src.rows("ItemSet")}
+    tables = StatTables(src, gametables)
 
     out = {}
     for sp in src.rows("ItemSparse"):
@@ -169,14 +327,14 @@ def build_items(src):
             "sparse": strip(sp, "ID", "Display_lang", "Description_lang", "ItemLevel", "RequiredLevel",
                             "InventoryType", "OverallQualityID", "ItemNameDescriptionID"),
             "item": strip(base, "ID", "ClassID", "SubclassID", "InventoryType", "IconFileDataID"),
+            "computed": compute_item(sp, cls, sub, tables),
             "effects": [],
             "bonusTrees": sorted(r["ItemBonusTreeID"] for r in bonus_trees.get(iid, [])),
         }
-        for link in item_effects.get(iid, []):
-            e = effects.get(link["ItemEffectID"])
-            if e:
-                rec["effects"].append(strip(e, "ID"))
-        rec["effects"].sort(key=lambda e: json.dumps(e, sort_keys=True))
+        # Ordered by the game's own slot, then spell: adding or changing one effect doesn't renumber the others in the history.
+        linked = [effects[link["ItemEffectID"]] for link in item_effects.get(iid, []) if link["ItemEffectID"] in effects]
+        linked.sort(key=lambda e: (e.get("LegacySlotIndex", 0), e.get("SpellID", 0), e.get("TriggerType", 0)))
+        rec["effects"] = [strip(e, "ID") for e in linked]
         s = sets.get(sp.get("ItemSet"))
         if s:
             rec["itemSet"] = {"id": s["ID"], "name": s["Name_lang"]}
@@ -199,6 +357,12 @@ def flatten(value, prefix=""):
 def diff(old, new):
     a, b = dict(flatten(old)), dict(flatten(new))
     return {p: [a.get(p), b.get(p)] for p in sorted(set(a) | set(b)) if a.get(p) != b.get(p)}
+
+
+def areas(changes):
+    """Top-level record sections a set of changes touches, e.g. ["computed", "effects"]. Lets a UI separate
+    'the stats changed' from 'the effect changed' without parsing paths."""
+    return sorted({re.split(r"[.\[]", path, maxsplit=1)[0] for path in changes})
 
 
 def digest(rec):
@@ -259,7 +423,7 @@ def ingest_entities(kind, new, build, push, baseline):
                 history.setdefault(eid, {"id": eid, "events": []})["events"].append({**event_base, "type": "added"})
         elif old["hash"] != h:
             changes = diff(old["data"], data)
-            ev = {**event_base, "type": "changed", "changes": changes}
+            ev = {**event_base, "type": "changed", "areas": areas(changes), "changes": changes}
             stats["changed"] += 1
             entry = {**old, "lastChanged": {"build": build, "push": push}, "hash": h, "data": data}
             history.setdefault(eid, {"id": eid, "events": []})["events"].append(ev)
@@ -305,8 +469,8 @@ def cmd_ingest(args):
 
     baseline = state is None
     results = {}
-    for kind, builder in (("spells", build_spells), ("items", build_items)):
-        current, history, stats = ingest_entities(kind, builder(src), build, push, baseline)
+    for kind, build_records in (("spells", lambda: build_spells(src)), ("items", lambda: build_items(src, args.gametables))):
+        current, history, stats = ingest_entities(kind, build_records(), build, push, baseline)
         results[kind] = stats
         if not args.dry_run:
             write_jsonl(DATA / f"{kind}.jsonl", current)
@@ -326,6 +490,7 @@ def cmd_ingest(args):
     summary = {"version": version, "push": push, "baseline": baseline, "suspicious": reasons, **results}
     if not args.dry_run:
         state_path.write_text(json.dumps(new_state, indent=1, sort_keys=True) + "\n")
+        (DATA / "stat-names.json").write_text(json.dumps({str(k): v for k, v in sorted(STAT_NAMES.items())}, indent=1) + "\n")
     if args.summary_file:
         Path(args.summary_file).write_text(render_summary(summary, scan))
     print(json.dumps(summary, indent=1))
@@ -367,6 +532,8 @@ def main():
     i.add_argument("--db", required=True, help="SQLite file written by db2tool")
     i.add_argument("--scan-log", help="saved db2tool stdout (records locked-row counts)")
     i.add_argument("--hotfix-cache", help="DBCache.bin used for the scan; its hash is stored so `builds.py check` can detect new hotfixes")
+    i.add_argument("--gametables", default=str(ROOT / "scan" / "gametables"),
+                   help="directory with the GameTable .txt files the stat rules need (default: the vendored scan/gametables)")
     i.add_argument("--summary-file", help="write a markdown summary here (used as the PR body)")
     i.add_argument("--allow-no-hotfixes", action="store_true", help="accept a scan with no hotfix overlay (historical builds)")
     i.add_argument("--allow-schema-change", action="store_true")
