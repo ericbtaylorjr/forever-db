@@ -90,8 +90,9 @@ Policy: run the latest stable release of everything we depend on, and make the c
 | Go (CI) | 1.27.3 | The forever repo's `go.mod` says 1.25.0/1.25.4; **Go 1.25 has been end of life since 2026-08-19** (no security fixes), so CI uses a newer toolchain. Verified: db2tool under 1.25.4 and 1.27.3 gives identical data in all 89 tables. |
 | Python (CI) | 3.15 | The pipeline is stdlib only. Local development used 3.14; the unit tests must pass on both. |
 | wowsims/forever (db2tool) | `scan/forever-ref.txt` | Pinned to a commit; bumped to upstream `master` on 2026-10-30 (no db2tool changes since the previous pin; our patch applies). |
+| Website packages | pinned exactly in `site/package.json` (react 19.3.1, vite 8.3.5, tailwindcss 4.3.3, typescript 7.0.2, vitest 5.0.5 ...) | Dependabot opens weekly PRs for `/site`; `npm audit` reported 0 vulnerabilities on 2026-10-30. |
 | Runner image | `ubuntu-latest` | GitHub is moving this to Ubuntu 26. |
-| Node | not used | There is no Node code yet. When the browser UI lands, use the current LTS (26.x as of this writing) and record it in `.nvmrc`/`engines`. |
+| Node (website CI) | 26 (LTS since 2026-10-28; 26.13.0 tested) | `site.yml` builds with Node 26 and `site/.nvmrc` says 26; `site/package.json` allows local Node ≥ 22.12. Before moving CI to 26 the typecheck, tests and build were run under 26.13.0 locally. `@types/node` is pinned to the 26 line to match. |
 
 Not pinned by us (fetched by db2tool at run time, so they can change between scans): WoWDBDefs `.dbd` files, the community `listfile.csv`, the community TACT key list. See `known-limitations.md`.
 

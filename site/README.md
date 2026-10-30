@@ -4,7 +4,7 @@ A static site (React 19, Vite 8, TypeScript, Tailwind 4, the same stack as the R
 
 ```sh
 python3 ../pipeline/site_data.py   # turn ../data into site/public/data (git-ignored, ~63 MB; rerun after the data changes)
-npm ci --ignore-scripts
+npm ci --ignore-scripts            # Node >= 22.12 locally; CI uses Node 26 (see .nvmrc)
 npm run dev                        # http://localhost:5173
 npm run typecheck && npm test      # types and unit tests
 npm run build                      # dist/
