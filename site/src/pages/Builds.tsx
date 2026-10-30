@@ -1,4 +1,5 @@
 import { getMeta } from '../lib/data.ts';
+import { dateTitle, formatDate } from '../lib/format.ts';
 import { toHash } from '../lib/router.ts';
 import { useAsync } from '../lib/useAsync.ts';
 import { Chip, ErrorBox, Loading, Panel } from '../components/ui.tsx';
@@ -12,7 +13,7 @@ export function BuildsPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">Builds</h1>
       <p className="max-w-3xl text-mute">
-        Every version of the game files we have scanned, newest first. A build with “hotfix” in its name includes the changes the server pushed on top of that build. Entries marked as base data
+        Every version of the game files we have scanned, newest first. Columns: items and spells added (+), changed (~), removed (−) and newly discovered (🔓); changed does not include the discovered ones. A build with “hotfix” in its name includes the changes the server pushed on top of that build. Entries marked as base data
         are the build as shipped, before any hotfix.
       </p>
       <Panel>
@@ -21,6 +22,7 @@ export function BuildsPage() {
             <thead className="text-left text-xs uppercase text-mute">
               <tr>
                 <th className="pr-4">Version</th>
+                <th className="pr-4">Added</th>
                 <th className="pr-4">Items (+ / ~ / − / 🔓)</th>
                 <th className="pr-4">Spells (+ / ~ / − / 🔓)</th>
                 <th className="pr-4">Encrypted items</th>
@@ -37,8 +39,9 @@ export function BuildsPage() {
                       <a href={toHash(['build', String(v.i)])} className="font-medium">{v.label}</a>
                       <div className="mt-1 flex gap-1">{v.push === 0 ? <Chip title="The build as shipped, without hotfixes">base data</Chip> : <Chip tone="accent">with hotfixes</Chip>}{first && <Chip title="First version tracked: everything counts as added">first tracked</Chip>}</div>
                     </td>
-                    <td className="py-2 pr-4 tabular-nums">{first ? '—' : `${i.added} / ${i.changed} / ${i.removed} / `}{!first && <span className="text-enc">{i.discovered}</span>}</td>
-                    <td className="py-2 pr-4 tabular-nums">{first ? '—' : `${s.added} / ${s.changed} / ${s.removed} / `}{!first && <span className="text-enc">{s.discovered}</span>}</td>
+                    <td className="whitespace-nowrap py-2 pr-4" title={dateTitle(v.dateSource)}>{formatDate(v.date)}</td>
+                    <td className="py-2 pr-4 tabular-nums">{first ? '—' : `${i.added} / ${i.changed - i.discovered} / ${i.removed} / `}{!first && <span className="text-enc">{i.discovered}</span>}</td>
+                    <td className="py-2 pr-4 tabular-nums">{first ? '—' : `${s.added} / ${s.changed - s.discovered} / ${s.removed} / `}{!first && <span className="text-enc">{s.discovered}</span>}</td>
                     <td className="py-2 pr-4 tabular-nums">{v.discovery ? v.discovery.items.encrypted.toLocaleString() : '—'}</td>
                     <td className="py-2 pr-4 tabular-nums">{v.discovery ? v.discovery.spells.encrypted.toLocaleString() : '—'}</td>
                     <td className="py-2 tabular-nums">

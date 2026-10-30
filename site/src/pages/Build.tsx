@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { getBuild, getItems, getMeta, getSpells, type BuildChange, type ItemIndex, type Meta, type SpellIndex, type VersionMeta } from '../lib/data.ts';
 import { fieldLabel, valueLabel } from '../lib/describe.ts';
 import { itemFilter, spellFilter } from '../lib/filters.ts';
-import { areaLabel, qualityColor } from '../lib/format.ts';
+import { areaLabel, dateTitle, formatDate, qualityColor } from '../lib/format.ts';
 import { navigate, toHash, useQueryParams } from '../lib/router.ts';
 import { useAsync } from '../lib/useAsync.ts';
 import { ItemFilterPanel, SpellFilterPanel } from '../components/FilterPanels.tsx';
@@ -144,6 +144,7 @@ export function BuildPage({ index }: { index: number }) {
           {v.push === 0 ? <Chip title="The build as shipped, before any hotfix">base data</Chip> : <Chip tone="accent">includes hotfixes</Chip>}
         </div>
         <p className="text-mute">
+          {v.date && <><span title={dateTitle(v.dateSource)}>Added {formatDate(v.date)}</span> · </>}
           {v.version}
           {v.hotfixes && v.push !== 0 ? ` · ${v.hotfixes}` : ''}
           {prev && <> · compared with <a href={toHash(['build', String(prev.i)])}>{prev.label}</a></>}

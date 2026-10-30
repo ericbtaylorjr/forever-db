@@ -19,6 +19,9 @@ export interface VersionMeta {
   push: number;
   version: string;
   label: string;
+  /** when the build was added (UTC date, YYYY-MM-DD), or null if unknown; dateSource says where it came from */
+  date: string | null;
+  dateSource: string | null;
   counts: { items: Counts; spells: Counts };
   discovery: { items: DiscoveryTotals; spells: DiscoveryTotals } | null;
   hotfixes: string | null;

@@ -83,6 +83,13 @@ class SiteDataTest(unittest.TestCase):
         self.assertIn("quality", change["a"])
         self.assertNotIn("qualityName", change["a"])
 
+    def test_build_dates_come_from_the_side_file_and_may_be_missing(self):
+        self.build_two_versions()
+        (build_data.DATA / "build-dates.json").write_text(json.dumps({"100:1": {"date": "2026-10-13", "source": "wago.tools"}}))
+        site_data.build(self.out)
+        versions = json.loads((self.out / "meta.json").read_text())["versions"]
+        self.assertEqual([(v["date"], v["dateSource"]) for v in versions], [("2026-10-13", "wago.tools"), (None, None)])
+
     def test_a_key_that_disappears_is_reported_as_unlocked(self):
         self.build_two_versions()
         meta = json.loads((self.out / "meta.json").read_text())

@@ -3,6 +3,7 @@
 
     builds.py check [--cache-out FILE] [--github-output]   is there a new build or hotfix push?
     builds.py list [--limit N]                              historical builds, oldest first, as `version buildConfig cdnConfig`
+    builds.py dates                                         record when each ingested build was added (data/build-dates.json)
 
 Sources (both public, no auth):
   * Blizzard's version service names the build `wowf` is on right now (US).
@@ -13,6 +14,7 @@ Sources (both public, no auth):
 Python stdlib only. See docs/update-runbook.md.
 """
 import argparse
+import email.utils
 import hashlib
 import json
 import os
@@ -21,6 +23,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+DATA = Path(os.environ.get("FOREVER_DB_DATA", ROOT / "data"))   # tests point this at a scratch dir
 PRODUCT = "wowf"
 VERSION_URL = f"https://us.version.battle.net/{PRODUCT}/versions"
 WAGO_URL = "https://wago.tools/api/builds"
@@ -31,6 +34,14 @@ def fetch(url):
     req = urllib.request.Request(url, headers={"User-Agent": "forever-db (github.com/wowsims)"})
     with urllib.request.urlopen(req, timeout=60) as r:
         return r.read()
+
+
+def last_modified(url):
+    """The Last-Modified date (UTC, YYYY-MM-DD) of a file, from a HEAD request."""
+    req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "forever-db (github.com/wowsims)"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        stamp = r.headers.get("Last-Modified")
+    return email.utils.parsedate_to_datetime(stamp).astimezone(__import__("datetime").timezone.utc).strftime("%Y-%m-%d") if stamp else None
 
 
 def live_version():
@@ -70,8 +81,35 @@ def cmd_list(args):
     return 0
 
 
+def cmd_dates(args):
+    """Fill data/build-dates.json for every ingested version that has no date yet. Existing entries are never changed.
+
+    A base build (push 0) is dated by wago.tools' record of when the build appeared. A hotfix push has no public date, so
+    the newest one is dated by the hotfix cache's Last-Modified, but only while that cache is still the one we ingested;
+    older pushes stay undated rather than guessed. The dates live in a side file because they are about the build, not
+    part of the game data (AGENTS.md rule 3)."""
+    state = json.loads((DATA / "state.json").read_text())
+    path = DATA / "build-dates.json"
+    dates = json.loads(path.read_text()) if path.exists() else {}
+    created = {r["version"]: r["created_at"] for r in json.loads(fetch(WAGO_URL))[PRODUCT]}
+    for b in state["builds"]:
+        key = f"{b['build']}:{b['hotfixPush']}"
+        if key not in dates and b["hotfixPush"] == 0 and b["version"] in created:
+            dates[key] = {"date": created[b["version"]][:10], "source": "wago.tools"}
+    latest = state["builds"][-1]
+    key = f"{latest['build']}:{latest['hotfixPush']}"
+    if key not in dates and latest["hotfixPush"] > 0:
+        current = hashlib.sha256(fetch(HOTFIX_CACHE_URL)).hexdigest()
+        if current == state.get("scan", {}).get("hotfixCacheSha256") and (stamp := last_modified(HOTFIX_CACHE_URL)):
+            dates[key] = {"date": stamp, "source": "hotfix cache last modified"}
+    path.write_text(json.dumps(dict(sorted(dates.items())), indent=1) + "\n")
+    undated = [f"{b['build']}:{b['hotfixPush']}" for b in state["builds"] if f"{b['build']}:{b['hotfixPush']}" not in dates]
+    print(f"{len(dates)} dated, {len(undated)} undated" + (f" ({', '.join(undated)})" if undated else ""))
+    return 0
+
+
 def cmd_check(args):
-    state_path = ROOT / "data" / "state.json"
+    state_path = DATA / "state.json"
     state = json.loads(state_path.read_text()) if state_path.exists() else {}
     live = live_version()
     cache = fetch(HOTFIX_CACHE_URL)
@@ -99,6 +137,8 @@ def main():
     c.add_argument("--cache-out", help="save the downloaded DBCache.bin here for the scan to use")
     c.add_argument("--github-output", action="store_true", help="write changed=true|false to $GITHUB_OUTPUT")
     c.set_defaults(fn=cmd_check)
+    d = sub.add_parser("dates", help="record when each ingested build was added")
+    d.set_defaults(fn=cmd_dates)
     l = sub.add_parser("list", help="past builds with their config hashes")
     l.add_argument("--limit", type=int, help="only the newest N")
     l.set_defaults(fn=cmd_list)

@@ -188,6 +188,7 @@ def build(out_dir):
     write_json(out_dir / "spells.json", {"cols": SPELL_COLS, "rows": spell_rows, "icons": icons, "tags": tags})
 
     # builds: one file per version
+    dates = json.loads((DATA / "build-dates.json").read_text()) if (DATA / "build-dates.json").exists() else {}
     locks = locked_changes(versions.entries)
     changes_by_version = defaultdict(list)
     for kind, history in (("i", item_hist), ("s", spell_hist)):
@@ -212,8 +213,9 @@ def build(out_dir):
         rows = changes_by_version.get(i, [])
         rows.sort(key=lambda r: (r["k"], r["id"]))
         write_json(out_dir / "builds" / f"{i}.json", {"changes": rows, **locks[i]})
+        dated = dates.get(f"{entry['build']}:{entry['hotfixPush']}", {})
         version_meta.append({"i": i, "build": entry["build"], "push": entry["hotfixPush"], "version": entry["version"],
-                             "label": label(entry), "counts": entry["counts"], "discovery": entry.get("discovery"),
+                             "label": label(entry), "date": dated.get("date"), "dateSource": dated.get("source"), "counts": entry["counts"], "discovery": entry.get("discovery"),
                              "hotfixes": entry.get("hotfixes"), "lockedRows": sum(n for t in locks[i]["locked"].values() for n in t.values()),
                              "unlocked": locks[i]["unlocked"], "newlyLocked": locks[i]["newlyLocked"]})
     write_json(out_dir / "meta.json", {

@@ -65,3 +65,10 @@ export function valueText(v: unknown): string {
   if (typeof v === 'string') return v === '' ? '(empty)' : v;
   return JSON.stringify(v);
 }
+
+/** "Oct 30, 2026" from a UTC date string (YYYY-MM-DD); the day is not shifted by the viewer's time zone. */
+export const formatDate = (iso: string | null | undefined): string =>
+  iso ? new Date(`${iso}T00:00:00Z`).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }) : '—';
+
+export const dateTitle = (source: string | null | undefined): string | undefined =>
+  source ? `Source: ${source}. Dates are UTC.` : 'No public date for this version';

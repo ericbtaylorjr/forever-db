@@ -10,6 +10,7 @@ Output contract of `pipeline/build_data.py`. The future browser UI should depend
 | `data/items.jsonl` | One line per item (gear is the subset with `data.isGear == true`) |
 | `data/history/spells.jsonl`, `data/history/items.jsonl` | One line per entity that has had at least one event since the baseline |
 | `data/state.json` | Ingest state (see below) |
+| `data/build-dates.json` | `"build:push"` → `{date, source}`: when each ingested version was added. Base builds from wago.tools; the newest hotfix push from the cache's Last-Modified; older pushes undated. Written by `builds.py dates` (run by `scan.sh`), never overwritten |
 | `data/stat-names.json` | ITEM_MOD id → display name, for `computed.stats` |
 | `data/icon-names.json` | icon FileDataID → icon file name (`inv_sword_01`), written by `pipeline/icon_names.py` from the community listfile |
 
