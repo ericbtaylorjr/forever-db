@@ -57,7 +57,7 @@ python3 pipeline/tests/check_history_roundtrip.py       # after changing the his
 11. **Item stats are derived, equip-effect stats are not merged.** `computed` comes from the budget tables; effects stay in `effects`. If you change the formula, the golden test must still pass and `data/` must be rebuilt (`scripts/backfill.sh`). Read `docs/item-stats-spike.md` first.
 12. **Encrypted is explicit.** Every item/spell has `discovery`; hidden ones are placeholders, never dropped or guessed (`docs/discovery.md`). A new `discovered` history event means the game revealed it.
 13. **Rendered text never contains a guessed number.** `pipeline/tooltips.py` renders a template only if every token is exact; otherwise the text is `null`. Do not "fix" a refusal by guessing; add an exact rule with a test and the gamedata check (`docs/tooltips.md`).
-14. **The website reads `data/` only through `pipeline/site_data.py`** (`docs/site-data.md`). A change to the record or history format must update `site_data.py`, `site/src/lib/data.ts` and `site/src/lib/history.ts` together, with `check_history_roundtrip.py` green. Publishing is opt-in (`PAGES_ENABLED`); never enable it on the owner's behalf.
+14. **The website reads `data/` only through `pipeline/site_data.py`** (`docs/site-data.md`). A change to the record or history format must update `site_data.py`, `site/src/lib/data.ts` and `site/src/lib/history.ts` together, with `check_history_roundtrip.py` green. Publishing is controlled by the `PAGES_ENABLED` repo variable (currently on); do not change it, or the Pages settings, unless the owner asks.
 15. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
 
 ## Conventions
@@ -71,6 +71,6 @@ python3 pipeline/tests/check_history_roundtrip.py       # after changing the his
 ## Project status (keep current)
 
 - Data: extraction, items/spells, history for builds 70245 → 70707 (+ hotfix push 113511), computed item stats (validated against wowsims' output), rendered spell text (83 % of templated texts, rest refused), spell availability tags, **encrypted/discovered tracking** (`docs/discovery.md`), automated updates (workflow written; first real update PR not yet seen).
-- Website v1 built (`site/`): Items and Spells browsers with filters, detail pages with history and compare, Builds list, Build page with change filters and locked-key reporting. Not yet published (see `site/README.md` > Publishing).
+- Website v1 built (`site/`): Items and Spells browsers with filters, detail pages with history and compare, Builds list, Build page with change filters and locked-key reporting. **Published** at https://ericbtaylorjr.github.io/forever-db/ (2026-10-30; Pages source = GitHub Actions, repo variable `PAGES_ENABLED=true`). Setting that variable to anything else stops deploys; the build still runs.
 - Not yet done: in-game verification of stats and spell text (`docs/verification-checklist.md`; the game is not live), the first real auto-update PR, item sources (where things drop), localization.
 - Open questions live in `docs/known-limitations.md`.

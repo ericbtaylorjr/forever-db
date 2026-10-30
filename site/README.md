@@ -35,6 +35,8 @@ npm run build                      # dist/
 
 ## Publishing
 
+Live at https://ericbtaylorjr.github.io/forever-db/ since 2026-10-30. To take it down: set the repository variable `PAGES_ENABLED` to anything other than `true` (deploys stop) and unpublish under Settings → Pages.
+
 `.github/workflows/site.yml` builds and tests on every push. It deploys to GitHub Pages only when the repository variable `PAGES_ENABLED` is `true` **and** Settings → Pages → Source is "GitHub Actions". Until then nothing is published. The update workflow merges routine data PRs and then starts this workflow itself (a merge made with the workflow's own token does not trigger it), so the site redeploys after each update once enabled. A flagged (`needs-review`) PR you merge by hand triggers it normally.
 
 ## Known limits
