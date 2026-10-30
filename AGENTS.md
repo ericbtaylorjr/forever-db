@@ -43,7 +43,8 @@ python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would cha
 7. **Locked rows are unknown, not absent.** Encrypted DB2 sections whose TACT key is unknown are skipped. db2tool prints them (`X: N rows locked by TACT key …`); `scan.sh` saves them in `state.json` → `scan.lockedRows`. Don't report those entities as removed/missing.
 8. **Commit what you scan with `--cdn`, not the local install.** The local `DBCache.bin` lags Raidbots' mirror. Never mix: an ingest that silently loses its hotfix overlay would record every hotfixed entity as changed (the ingest refuses this).
 9. **Pin, don't float, the extraction tool.** `scan/forever-ref.txt` fixes the wowsims/forever commit. Bump it deliberately and review the first ingest after.
-10. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
+10. **Keep dependencies on the latest stable release, explicitly pinned** (policy, versions and the upgrade routine are in `docs/update-runbook.md` → Dependencies). GitHub Actions are pinned by commit SHA; do not use floating tags like `@v4` or `latest`.
+11. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
 
 ## Conventions
 

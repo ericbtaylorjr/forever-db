@@ -70,6 +70,23 @@ Limits (also in `known-limitations.md`): wago.tools' list is the only source of 
 
 Rewriting `data/` this way changes every entity's `firstSeen`/`lastChanged` bookkeeping; commit it as a single `data: rebuild history` commit.
 
+## Dependencies and versions
+
+Policy: run the latest stable release of everything we depend on, and make the choice explicit so a floating "latest" can't change results silently. Checked 2026-10-30:
+
+| Dependency | Version | Notes |
+|---|---|---|
+| GitHub Actions `checkout`, `setup-python`, `setup-go` | v7.0.1, v7.1.0, v7.0.0 | Pinned by **commit SHA** (a moved tag can't inject code) with the version in a comment. They run on Node 24; the earlier "Node.js 20 is deprecated" warning came from `checkout@v4`. Dependabot (`.github/dependabot.yml`) opens weekly PRs to bump them. |
+| Go (CI) | 1.27.3 | The forever repo's `go.mod` says 1.25.0/1.25.4; **Go 1.25 has been end of life since 2026-08-19** (no security fixes), so CI uses a newer toolchain. Verified: db2tool under 1.25.4 and 1.27.3 gives identical data in all 89 tables. |
+| Python (CI) | 3.15 | The pipeline is stdlib only. Local development used 3.14; the unit tests must pass on both. |
+| wowsims/forever (db2tool) | `scan/forever-ref.txt` | Pinned to a commit; bumped to upstream `master` on 2026-10-30 (no db2tool changes since the previous pin; our patch applies). |
+| Runner image | `ubuntu-latest` | GitHub is moving this to Ubuntu 26. |
+| Node | not used | There is no Node code yet. When the browser UI lands, use the current LTS (26.x as of this writing) and record it in `.nvmrc`/`engines`. |
+
+Not pinned by us (fetched by db2tool at run time, so they can change between scans): WoWDBDefs `.dbd` files, the community `listfile.csv`, the community TACT key list. See `known-limitations.md`.
+
+**Upgrade routine** (monthly, or when Dependabot/an advisory says so): bump the version, run the scan under old and new and compare the SQLite tables (they must match, as done for Go above), run the tests, then update this table and the date.
+
 ## When it breaks
 
 - *`rows locked by TACT key`* – normal (see above).
@@ -77,4 +94,4 @@ Rewriting `data/` this way changes every entity's `firstSeen`/`lastChanged` book
 - *Counts swing wildly or ingest flagged* – a table failed to decode and dependent entities lost data. Do **not** merge; fix the source first, then re-run.
 - *`--cdn` scan has no hotfixes* – the Raidbots mirror is unreachable or empty; the ingest will refuse. Retry later; do not force.
 - *Bad data already merged* – revert the commit that wrote it and re-ingest. Never edit `data/` by hand.
-- *Workflow itself* – `.github/workflows/update-data.yml` has not run on GitHub yet (it was written and its steps exercised locally, but not as a workflow). First thing to check after enabling it: Actions → *Update data* → *Run workflow*.
+- *Workflow itself* – `.github/workflows/update-data.yml` has not run on GitHub yet (its steps were exercised locally; the `Test` workflow has run on GitHub). First thing to check after enabling it: Actions → *Update data* → *Run workflow*.
