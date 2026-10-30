@@ -1301,29 +1301,192 @@
     }
    },
    "version": "1.60.1.70707"
+  },
+  {
+   "build": 70707,
+   "counts": {
+    "items": {
+     "added": 0,
+     "changed": 0,
+     "discovered": 0,
+     "removed": 0,
+     "unchanged": 31940
+    },
+    "spells": {
+     "added": 0,
+     "changed": 1,
+     "discovered": 0,
+     "removed": 0,
+     "unchanged": 33378
+    }
+   },
+   "discovery": {
+    "items": {
+     "discovered": 19735,
+     "encrypted": 12205
+    },
+    "spells": {
+     "discovered": 32017,
+     "encrypted": 1362
+    }
+   },
+   "hotfixPush": 113516,
+   "hotfixes": "build 70707 up to push 113516",
+   "locked": {
+    "AreaTable": {
+     "0DA4670DB36FB2A9": 16,
+     "D2C028CB7AC14D0B": 29,
+     "DA0E7785727A0A65": 1
+    },
+    "Item": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 53
+    },
+    "ItemEffect": {
+     "057DC814574BD5B6": 7,
+     "DA0E7785727A0A65": 25
+    },
+    "ItemSparse": {
+     "DA0E7785727A0A65": 63
+    },
+    "ItemXItemEffect": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 32
+    },
+    "Map": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 5,
+     "DA0E7785727A0A65": 1
+    },
+    "SkillLineAbility": {
+     "057DC814574BD5B6": 1
+    },
+    "Spell": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 278,
+     "D2C028CB7AC14D0B": 129,
+     "DA0E7785727A0A65": 53
+    },
+    "SpellAuraOptions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 40,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellAuraRestrictions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 2,
+     "DA0E7785727A0A65": 9
+    },
+    "SpellCastingRequirements": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 16,
+     "DA0E7785727A0A65": 17
+    },
+    "SpellCategories": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 219,
+     "D2C028CB7AC14D0B": 107,
+     "DA0E7785727A0A65": 18
+    },
+    "SpellClassOptions": {
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 6
+    },
+    "SpellCooldowns": {
+     "057DC814574BD5B6": 5,
+     "0DA4670DB36FB2A9": 38,
+     "D2C028CB7AC14D0B": 21,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellEffect": {
+     "057DC814574BD5B6": 62,
+     "0DA4670DB36FB2A9": 665,
+     "D2C028CB7AC14D0B": 382,
+     "DA0E7785727A0A65": 200
+    },
+    "SpellEquippedItems": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 9
+    },
+    "SpellInterrupts": {
+     "057DC814574BD5B6": 8,
+     "0DA4670DB36FB2A9": 187,
+     "D2C028CB7AC14D0B": 94,
+     "DA0E7785727A0A65": 33
+    },
+    "SpellItemEnchantment": {
+     "057DC814574BD5B6": 1
+    },
+    "SpellLabel": {
+     "0DA4670DB36FB2A9": 18,
+     "D2C028CB7AC14D0B": 3,
+     "DA0E7785727A0A65": 23
+    },
+    "SpellLevels": {
+     "0DA4670DB36FB2A9": 93,
+     "D2C028CB7AC14D0B": 64,
+     "DA0E7785727A0A65": 2
+    },
+    "SpellMisc": {
+     "057DC814574BD5B6": 50,
+     "0DA4670DB36FB2A9": 509,
+     "D2C028CB7AC14D0B": 292,
+     "DA0E7785727A0A65": 102
+    },
+    "SpellName": {
+     "057DC814574BD5B6": 17,
+     "0DA4670DB36FB2A9": 293,
+     "D2C028CB7AC14D0B": 215,
+     "DA0E7785727A0A65": 84
+    },
+    "SpellPower": {
+     "0DA4670DB36FB2A9": 22,
+     "D2C028CB7AC14D0B": 24
+    },
+    "SpellReagents": {
+     "057DC814574BD5B6": 3,
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 16
+    },
+    "SpellShapeshift": {
+     "0DA4670DB36FB2A9": 2
+    },
+    "SpellTargetRestrictions": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 97,
+     "D2C028CB7AC14D0B": 24,
+     "DA0E7785727A0A65": 12
+    }
+   },
+   "version": "1.60.1.70707"
   }
  ],
  "counts": {
   "items": {
    "added": 0,
-   "changed": 567,
-   "discovered": 468,
-   "removed": 65,
-   "unchanged": 31373
-  },
-  "spells": {
-   "added": 0,
    "changed": 0,
    "discovered": 0,
    "removed": 0,
-   "unchanged": 33379
+   "unchanged": 31940
+  },
+  "spells": {
+   "added": 0,
+   "changed": 1,
+   "discovered": 0,
+   "removed": 0,
+   "unchanged": 33378
   }
  },
- "hotfixPush": 113511,
+ "hotfixPush": 113516,
  "product": "wowf",
  "scan": {
-  "hotfixCacheSha256": "ebc2f037e07956d6394d9e27fb97831dde88fb6db5c3bc563e9da797801e8474",
-  "hotfixSummary": "build 70707 up to push 113511, carried from build 70685",
+  "hotfixCacheSha256": "c4535b7fda2366dd5c70e0fc4936a7e3d24b7ccd4e8414fd197d05a0c48f135f",
+  "hotfixSummary": "build 70707 up to push 113516",
   "lockedByKey": {
    "AreaTable": {
     "0DA4670DB36FB2A9": 16,
