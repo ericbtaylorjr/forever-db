@@ -48,6 +48,10 @@ Item stats are computed during the ingest from the budget tables in the scan. Th
 
 If you change the stat rules, run the unit tests (the golden set must still pass), then rebuild `data/` with `scripts/backfill.sh` and commit it as `data: rebuild history`. To regenerate the golden items (only when the formula or the reference intentionally changes): `python3 pipeline/tests/make_golden.py .scan/scan.db $FOREVER_REPO/assets/database/db.json`.
 
+## Checking the models against wowsims
+
+After changing `pipeline/tooltips.py` (effect amounts, ranges) or the item rules: run `python3 pipeline/tests/check_against_gamedata.py .scan/scan.db <gamedata checkout>/spells` (tooltips; expect 1,959/1,961 amounts and 748/748 ranges) and the item comparison in `docs/item-stats-spike.md`, plus `python3 -m unittest discover -s pipeline/tests`. `docs/verification-checklist.md` is the list to compare in game.
+
 ## Verifying an ingest
 
 The ingest prints and saves (`.scan/summary.md`) added/changed/removed/unchanged per kind and, automatically, flags it **Needs review** when more than 10 % of entities changed or 2 % were removed. That threshold is a tripwire for tool/schema problems, not a statement about normal updates. Each changed event also carries `areas` (e.g. `computed`, `effects`, `related`), which helps tell a stat change from an effect change at a glance. Typical real updates in the history so far: tens to a few hundred changed entities, and a few hundred new items/spells when a hotfix adds content.

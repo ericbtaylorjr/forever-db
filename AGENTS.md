@@ -11,6 +11,7 @@ Dataset (and, later, browser) of every spell, item and piece of gear in WoW **Fo
 | `data/stat-names.json` | ITEM_MOD id → name for `computed.stats`. Generated. |
 | `data/state.json` | Last ingested build + hotfix push, hotfix-cache hash, per-table column layout, locked-row counts, per-ingest log. Generated. |
 | `pipeline/build_data.py` | Reads a db2tool SQLite dump, joins tables into records, diffs against `data/`, writes `data/`. Python stdlib only. |
+| `pipeline/tooltips.py` | Renders spell description templates, or refuses (`docs/tooltips.md`). |
 | `pipeline/builds.py` | `check` (is there a new build/hotfix?) and `list` (historical builds + CDN config hashes from wago.tools). |
 | `pipeline/spikes/` | Throwaway prototypes (not production code), each pointing at the doc that explains it. |
 | `pipeline/tests/` | Unit tests on synthetic dumps and stubbed network, plus a golden set of real items (`golden_items.json`, regenerated with `make_golden.py`). |
@@ -48,7 +49,8 @@ python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would cha
 9. **Pin, don't float, the extraction tool.** `scan/forever-ref.txt` fixes the wowsims/forever commit. Bump it deliberately and review the first ingest after.
 10. **Keep dependencies on the latest stable release, explicitly pinned** (policy, versions and the upgrade routine are in `docs/update-runbook.md` → Dependencies). GitHub Actions are pinned by commit SHA; do not use floating tags like `@v4` or `latest`.
 11. **Item stats are derived, equip-effect stats are not merged.** `computed` comes from the budget tables; effects stay in `effects`. If you change the formula, the golden test must still pass and `data/` must be rebuilt (`scripts/backfill.sh`). Read `docs/item-stats-spike.md` first.
-12. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
+12. **Rendered text never contains a guessed number.** `pipeline/tooltips.py` renders a template only if every token is exact; otherwise the text is `null`. Do not "fix" a refusal by guessing; add an exact rule with a test and the gamedata check (`docs/tooltips.md`).
+13. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
 
 ## Conventions
 
@@ -61,5 +63,6 @@ python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would cha
 ## Project status (keep current)
 
 - Done: extraction via db2tool, normalized spells/items, field-level history, history for builds 70245 → 70685 (+ hotfix push 113511), update check, scheduled workflow (written, not yet run on GitHub).
+- Done: spell tooltips rendered (83.3 % of templated texts, rest refused), spell `availability` tags, in-game checklist (`docs/verification-checklist.md`, not yet run by a person).
 - Done: item stats computed in the pipeline (`computed`, validated against wowsims' output: 5,200/5,225 items, 801/801 weapons), history events carry `areas`, effects ordered by game slot.
-- Next: confirm the first real auto-update PR (the pushed workflow predates the stats change, push first); spell tooltip rendering; "player-usable spell" filter; the browser UI (GitHub Pages). Open questions live in `docs/known-limitations.md`.
+- Next: confirm the first real auto-update PR (the pushed workflow predates the stats change, push first); run the in-game checklist; the browser UI (GitHub Pages). Open questions live in `docs/known-limitations.md`.

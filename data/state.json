@@ -34,9 +34,9 @@
     },
     "spells": {
      "added": 223,
-     "changed": 2122,
+     "changed": 2177,
      "removed": 8,
-     "unchanged": 29617
+     "unchanged": 29562
     }
    },
    "hotfixPush": 0,
@@ -54,9 +54,9 @@
     },
     "spells": {
      "added": 9,
-     "changed": 127,
+     "changed": 131,
      "removed": 0,
-     "unchanged": 31835
+     "unchanged": 31831
     }
    },
    "hotfixPush": 0,
@@ -114,9 +114,9 @@
     },
     "spells": {
      "added": 1,
-     "changed": 1,
+     "changed": 2,
      "removed": 0,
-     "unchanged": 31970
+     "unchanged": 31969
     }
    },
    "hotfixPush": 0,
@@ -134,9 +134,9 @@
     },
     "spells": {
      "added": 59,
-     "changed": 141,
+     "changed": 144,
      "removed": 0,
-     "unchanged": 31831
+     "unchanged": 31828
     }
    },
    "hotfixPush": 113511,
@@ -153,9 +153,9 @@
   },
   "spells": {
    "added": 59,
-   "changed": 141,
+   "changed": 144,
    "removed": 0,
-   "unchanged": 31831
+   "unchanged": 31828
   }
  },
  "hotfixPush": 113511,

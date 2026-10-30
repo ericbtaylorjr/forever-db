@@ -260,6 +260,42 @@ class IngestTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             self.ingest(self.db("a.db", items={1: ("A", 10, 5)}))
 
+    def test_spell_availability_tags(self):
+        db = self.db("a.db", spells={n: (name, "x") for n, name in {
+            1: "Fireball", 2: "Fireball Splash", 3: "Axe Skill", 4: "Alchemy", 5: "Trinket Use", 6: "Crit Talent", 7: "Set Bonus",
+            8: "NPC Bite", 9: "Old Thing (OLD)", 10: "Wolf Howl", 11: "Chain Child", 12: "Family Only"}.items()}, items={99: ("Trinket", 10, 12)}, effects={99: [5]})
+        con = sqlite3.connect(db)
+        con.executescript("""
+            create table SkillLine (ID INTEGER, CategoryID INTEGER, DisplayName_lang TEXT);
+            insert into SkillLine values (10, 7, 'Fire'), (11, 6, 'Axes'), (12, 11, 'Alchemy'), (13, 7, 'Pet - Wolf');
+            create table SkillLineAbility (ID INTEGER, SkillLine INTEGER, Spell INTEGER, ClassMask INTEGER);
+            insert into SkillLineAbility values (1, 10, 1, 128), (2, 11, 3, 0), (3, 12, 4, 0), (4, 13, 10, 0), (5, 10, 1, 256);
+            create table Talent (ID INTEGER, SpellID INTEGER, SpellRank TEXT);
+            insert into Talent values (1, 0, '[6,0,0]');
+            insert into ItemEffect (ID, SpellID) values (900, 8);  -- an effect row no item points at
+            create table ItemSetSpell (ID INTEGER, SpellID INTEGER);
+            insert into ItemSetSpell values (1, 7);
+            create table SpellEffect (ID INTEGER, SpellID INTEGER, EffectTriggerSpell INTEGER);
+            insert into SpellEffect values (1, 1, 2), (2, 2, 11), (3, 8, 0);
+            create table SpellClassOptions (ID INTEGER, SpellID INTEGER, SpellClassSet INTEGER);
+            insert into SpellClassOptions values (1, 12, 9);
+        """)
+        con.commit(); con.close()
+        self.ingest(db)
+        tags = {sid: r["data"]["computed"]["availability"] for sid, r in self.current("spells").items()}
+        self.assertEqual(tags[1], ["class:Mage", "class:Warlock"])  # one spell on two classes' lists
+        self.assertEqual(tags[2], ["triggered"])
+        self.assertEqual(tags[11], ["triggered"])                    # transitive: Fireball -> Splash -> Chain Child
+        self.assertEqual(tags[3], ["weapon-skill"])
+        self.assertEqual(tags[4], ["profession"])
+        self.assertEqual(tags[5], ["item"])
+        self.assertEqual(tags[6], ["talent"])
+        self.assertEqual(tags[7], ["item-set"])
+        self.assertEqual(tags[8], [])                                # item effect row not linked to any item
+        self.assertEqual(tags[9], ["marked-obsolete"])
+        self.assertEqual(tags[10], ["pet"])
+        self.assertEqual(tags[12], ["class-family:Hunter"])
+
     def test_default_values_are_omitted(self):
         self.ingest(self.db("a.db", spells={1: ("A", "x")}))
         misc = self.current("spells")[1]["data"]["related"]["SpellMisc"][0]

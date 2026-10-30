@@ -19,6 +19,9 @@ import sqlite3
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # python -I does not add the script's folder
+import tooltips  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA = Path(os.environ.get("FOREVER_DB_DATA", ROOT / "data"))
 SCHEMA_VERSION = 1
@@ -65,6 +68,14 @@ GAMETABLE_FILES = ("ShieldBlockRegular.txt",)
 DAMAGE_TABLES = ("ItemDamageOneHand", "ItemDamageOneHandCaster", "ItemDamageTwoHand", "ItemDamageTwoHandCaster",
                  "ItemDamageRanged", "ItemDamageThrown", "ItemDamageWand")
 
+# Where a player can get a spell, from the skill-line categories of SkillLine.CategoryID.
+SKILL_CATEGORY_TAG = {6: "weapon-skill", 8: "armor-skill", 9: "secondary-skill", 10: "language", 11: "profession"}
+CLASS_BITS = {1: "Warrior", 2: "Paladin", 4: "Hunter", 8: "Rogue", 16: "Priest", 32: "Death Knight", 64: "Shaman",
+              128: "Mage", 256: "Warlock", 512: "Monk", 1024: "Druid", 2048: "Demon Hunter"}
+# SpellClassOptions.SpellClassSet ("spell family"): the class a spell belongs to for talent/modifier purposes.
+CLASS_FAMILY = {3: "Mage", 4: "Warrior", 5: "Warlock", 6: "Priest", 7: "Druid", 8: "Rogue", 9: "Hunter", 10: "Paladin", 11: "Shaman"}
+OBSOLETE_NAME = re.compile(r"\(OLD\)|DEPRECATED|\[DNT\]|^zz|\btest\b", re.IGNORECASE)
+
 _EXPANDED = re.compile(r"^(.*)_(\d+)$")
 
 
@@ -82,22 +93,23 @@ class Source:
         self.tables = {r[0] for r in self.db.execute("select name from sqlite_master where type='table'")}
         self.columns = {t: [(r[1], r[2]) for r in self.db.execute(f'pragma table_info("{t}")')] for t in self.tables}
 
-    def rows(self, table):
+    def rows(self, table, raw=False):
         """Rows as dicts. The tool writes array columns twice (JSON text plus
-        `Col_0`, `Col_1`, ... copies); keep the JSON form and drop the copies."""
+        `Col_0`, `Col_1`, ... copies); keep the JSON form and drop the copies.
+        Floats are rounded to 6 decimals unless `raw`: the tooltip model needs the exact float32 values."""
         if table not in self.tables:
             return []
         cols = self.columns[table]
         names = {c for c, _ in cols}
         keep = [(c, t) for c, t in cols if not (_EXPANDED.match(c) and _EXPANDED.match(c).group(1) in names)]
         out = []
-        for raw in self.db.execute(f'select {",".join(chr(34)+c+chr(34) for c, _ in keep)} from "{table}"'):
+        for values in self.db.execute(f'select {",".join(chr(34)+c+chr(34) for c, _ in keep)} from "{table}"'):
             row = {}
-            for (c, t), v in zip(keep, raw):
+            for (c, t), v in zip(keep, values):
                 if t == "TEXT" and not c.endswith("_lang") and isinstance(v, str) and v.startswith("["):
                     v = json.loads(v)
-                    v = [norm(x) for x in v]
-                row[c] = norm(v)
+                    v = v if raw else [norm(x) for x in v]
+                row[c] = v if raw else norm(v)
             out.append(row)
         return out
 
@@ -124,6 +136,63 @@ def child_rows(rows, *drop):
     return sorted(cleaned, key=lambda r: json.dumps(r, sort_keys=True))
 
 
+def spell_availability(src):
+    """{spell id: sorted tags} saying where a spell comes from.
+
+    Tags: class:<Name> / class (class skill lines), class-family:<Name> (SpellClassSet: belongs to that class's spell family,
+    which also catches rune-style and proc spells that no skill line teaches), pet, talent, weapon-skill, armor-skill, secondary-skill, language,
+    profession, skill, item (an item's use/equip effect), item-set (set bonus), triggered (fired, directly or through
+    further triggers, by a spell that has a source of its own), marked-obsolete (name says OLD/DEPRECATED/test). A spell with no tag at all is
+    not reachable through any table we read: internal, scripted, or a source we do not extract."""
+    tags = {}
+
+    def add(spell, tag):
+        if spell:
+            tags.setdefault(spell, set()).add(tag)
+
+    lines = {r["ID"]: r for r in src.rows("SkillLine")}
+    for r in src.rows("SkillLineAbility"):
+        line = lines.get(r["SkillLine"], {})
+        category, mask = line.get("CategoryID"), r.get("ClassMask", 0)
+        if line.get("DisplayName_lang", "").startswith("Pet -"):
+            add(r["Spell"], "pet")
+        elif category == 7:
+            named = [name for bit, name in CLASS_BITS.items() if mask > 0 and mask & bit]
+            for name in named or [None]:
+                add(r["Spell"], f"class:{name}" if name else "class")
+        else:
+            add(r["Spell"], SKILL_CATEGORY_TAG.get(category, "skill"))
+    for r in src.rows("Talent"):
+        for spell in [r.get("SpellID", 0), *(r.get("SpellRank") or [])]:
+            add(spell, "talent")
+    for r in src.rows("TraitDefinition"):
+        add(r.get("SpellID", 0), "talent")
+    linked = {r["ItemEffectID"] for r in src.rows("ItemXItemEffect")}
+    for r in src.rows("ItemEffect"):
+        if r["ID"] in linked:
+            add(r.get("SpellID", 0), "item")
+    for r in src.rows("ItemSetSpell"):
+        add(r.get("SpellID", 0), "item-set")
+    for r in src.rows("SpellClassOptions"):
+        if r.get("SpellClassSet") in CLASS_FAMILY:
+            add(r["SpellID"], f"class-family:{CLASS_FAMILY[r['SpellClassSet']]}")
+    # Spells fired (directly or through further triggers) by a spell that has a source of its own.
+    triggers = {}
+    for r in src.rows("SpellEffect"):
+        if r.get("EffectTriggerSpell"):
+            triggers.setdefault(r["SpellID"], set()).add(r["EffectTriggerSpell"])
+    queue = list(tags)
+    while queue:
+        for target in triggers.get(queue.pop(), ()):
+            if target not in tags:
+                queue.append(target)
+            add(target, "triggered")
+    for r in src.rows("SpellName"):
+        if OBSOLETE_NAME.search(r.get("Name_lang", "")):
+            add(r["ID"], "marked-obsolete")
+    return {spell: sorted(t) for spell, t in tags.items()}
+
+
 def build_spells(src):
     spell = {r["ID"]: r for r in src.rows("Spell")}
     name = {r["ID"]: r for r in src.rows("SpellName")}
@@ -139,6 +208,8 @@ def build_spells(src):
             related[t] = src.by_key(t, key)
     related["SkillLineAbility"] = src.by_key("SkillLineAbility", "Spell")
 
+    availability = spell_availability(src)
+    renderer = tooltips.Renderer(tooltips.Facts(src))
     out = {}
     for sid in sorted(set(spell) | set(name)):
         s, n = spell.get(sid, {}), name.get(sid, {})
@@ -158,6 +229,12 @@ def build_spells(src):
             r = rng.get(m.get("RangeIndex"), {})
             rec["range"] = {"name": r.get("DisplayName_lang"), "min": r.get("RangeMin"), "max": r.get("RangeMax")} if r else None
         rec["related"] = {t: child_rows(idx[sid], "SpellID", "Spell") for t, idx in related.items() if sid in idx}
+        rec["computed"] = {"availability": availability.get(sid, [])}
+        rendered, blocked = renderer.render(renderer.facts.get(sid))
+        if rendered:
+            rec["computed"]["tooltip"] = rendered           # text, or null where a token could not be rendered exactly
+        if blocked:
+            rec["computed"]["tooltipBlockedBy"] = blocked
         out[sid] = rec
     return out
 

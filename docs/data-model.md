@@ -44,6 +44,18 @@ Scalars (all optional; absent = default):
 | `durationMs` | `SpellDuration.Duration` via `SpellMisc.DurationIndex` |
 | `range` | `{name, min[], max[]}` from `SpellRange` via `SpellMisc.RangeIndex` |
 
+`computed` (spells):
+
+```jsonc
+"computed": {
+  "availability": ["class:Mage", "item"],        // where a player can get it; see below
+  "tooltip": {"description": "..." | null, "auraDescription": "..." | null},   // rendered templates, docs/tooltips.md
+  "tooltipBlockedBy": ["$s1"]                    // only if some template was refused
+}
+```
+
+`availability` tags (sorted; empty = no player source found): `class:<Name>` (a class skill line teaches it), `class-family:<Name>` (belongs to that class's spell family, which also catches talent procs and rune-style spells), `pet`, `talent` (Talent/Trait tables), `weapon-skill`, `armor-skill`, `secondary-skill`, `language`, `profession`, `skill`, `item` (an item's use/equip effect), `item-set` (set bonus), `triggered` (fired, directly or through further triggers, by a spell that has a source), `marked-obsolete` (name says OLD/DEPRECATED/[DNT]/test). It describes provenance, not whether a spell is "real": about half the spells have no tag and are mostly NPC/creature and scripted abilities, which are legitimate game content that no player can cast.
+
 `related`: `{ "<DB2 table>": [row, ...] }` for every per-spell table keyed by `SpellID` (`SpellEffect`, `SpellPower`, `SpellCooldowns`, `SpellLevels`, `SpellCategories`, `SpellAuraOptions`, `SpellClassOptions`, `SpellReagents`, `SpellMisc`, …) plus `SkillLineAbility` (keyed by `Spell`). Rows keep the DB2 column names, drop the surrogate `ID` and the key column, drop default-valued fields, and are sorted deterministically. Array columns are JSON arrays.
 
 ## `data` for items
