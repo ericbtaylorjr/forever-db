@@ -1,0 +1,991 @@
+{
+ "baselineBuild": 70685,
+ "baselinePush": 113441,
+ "build": 70685,
+ "builds": [
+  {
+   "build": 70685,
+   "counts": {
+    "items": {
+     "added": 19735,
+     "changed": 0,
+     "removed": 0,
+     "unchanged": 0
+    },
+    "spells": {
+     "added": 32031,
+     "changed": 0,
+     "removed": 0,
+     "unchanged": 0
+    }
+   },
+   "hotfixPush": 113441,
+   "version": "1.60.1.70685"
+  }
+ ],
+ "counts": {
+  "items": {
+   "added": 19735,
+   "changed": 0,
+   "removed": 0,
+   "unchanged": 0
+  },
+  "spells": {
+   "added": 32031,
+   "changed": 0,
+   "removed": 0,
+   "unchanged": 0
+  }
+ },
+ "hotfixPush": 113441,
+ "product": "wowf",
+ "scan": {
+  "lockedRows": {}
+ },
+ "schema": {
+  "AreaGroupMember": [
+   "ID:INTEGER",
+   "AreaID:INTEGER",
+   "AreaGroupID:INTEGER"
+  ],
+  "AreaTable": [
+   "ID:INTEGER",
+   "ZoneName:TEXT",
+   "AreaName_lang:TEXT",
+   "ContinentID:INTEGER",
+   "ParentAreaID:INTEGER",
+   "AreaBit:INTEGER",
+   "SoundProviderPref:INTEGER",
+   "SoundProviderPrefUnderwater:INTEGER",
+   "AmbienceID:INTEGER",
+   "UwAmbience:INTEGER",
+   "ZoneMusic:INTEGER",
+   "UwZoneMusic:INTEGER",
+   "ExplorationLevel:INTEGER",
+   "IntroSound:INTEGER",
+   "UwIntroSound:INTEGER",
+   "FactionGroupMask:INTEGER",
+   "Ambient_multiplier:REAL",
+   "MountFlags:INTEGER",
+   "PvpCombatWorldStateID:INTEGER",
+   "WildBattlePetLevelMin:INTEGER",
+   "WildBattlePetLevelMax:INTEGER",
+   "WindSettingsID:INTEGER",
+   "ContentTuningID:INTEGER",
+   "Flags:TEXT",
+   "LiquidTypeID:TEXT"
+  ],
+  "ArmorLocation": [
+   "ID:INTEGER",
+   "Clothmodifier:REAL",
+   "Leathermodifier:REAL",
+   "Chainmodifier:REAL",
+   "Platemodifier:REAL",
+   "Modifier:REAL"
+  ],
+  "BuildInfo": [
+   "Version:TEXT",
+   "Product:TEXT",
+   "HotfixPush:INTEGER"
+  ],
+  "Curve": [
+   "ID:INTEGER",
+   "Type:INTEGER",
+   "Flags:INTEGER"
+  ],
+  "CurvePoint": [
+   "Pos:TEXT",
+   "PosPreSquish:TEXT",
+   "ID:INTEGER",
+   "CurveID:INTEGER",
+   "OrderIndex:INTEGER"
+  ],
+  "Difficulty": [
+   "ID:INTEGER",
+   "Name_lang:TEXT",
+   "InstanceType:INTEGER",
+   "OrderIndex:INTEGER",
+   "OldEnumValue:INTEGER",
+   "FallbackDifficultyID:INTEGER",
+   "MinPlayers:INTEGER",
+   "MaxPlayers:INTEGER",
+   "Flags:INTEGER",
+   "ItemContext:INTEGER",
+   "ToggleDifficultyID:INTEGER",
+   "GroupSizeHealthCurveID:INTEGER",
+   "GroupSizeDmgCurveID:INTEGER",
+   "GroupSizeSpellPointsCurveID:INTEGER",
+   "Field_1_15_4_56400_013:INTEGER"
+  ],
+  "ExpectedStat": [
+   "ID:INTEGER",
+   "ExpansionID:INTEGER",
+   "CreatureHealth:REAL",
+   "PlayerHealth:REAL",
+   "CreatureAutoAttackDps:REAL",
+   "CreatureArmor:REAL",
+   "PlayerMana:REAL",
+   "PlayerPrimaryStat:REAL",
+   "PlayerSecondaryStat:REAL",
+   "ArmorConstant:REAL",
+   "CreatureSpellDamage:REAL",
+   "ContentSetID:INTEGER",
+   "Lvl:INTEGER"
+  ],
+  "ExpectedStatMod": [
+   "ID:INTEGER",
+   "CreatureHealthMod:REAL",
+   "PlayerHealthMod:REAL",
+   "CreatureAutoAttackDPSMod:REAL",
+   "CreatureArmorMod:REAL",
+   "PlayerManaMod:REAL",
+   "PlayerPrimaryStatMod:REAL",
+   "PlayerSecondaryStatMod:REAL",
+   "ArmorConstantMod:REAL",
+   "CreatureSpellDamageMod:REAL"
+  ],
+  "Faction": [
+   "ID:INTEGER",
+   "Name_lang:TEXT",
+   "Description_lang:TEXT",
+   "ReputationIndex:INTEGER",
+   "ParentFactionID:INTEGER",
+   "Expansion:INTEGER",
+   "FriendshipRepID:INTEGER",
+   "Flags:INTEGER",
+   "ParagonFactionID:INTEGER",
+   "RenownFactionID:INTEGER",
+   "RenownCurrencyID:INTEGER",
+   "RenownThresholdCurveID:INTEGER",
+   "ReputationClassMask:TEXT",
+   "ReputationFlags:TEXT",
+   "ReputationBase:TEXT",
+   "ReputationMax:TEXT",
+   "ParentFactionMod:TEXT",
+   "ParentFactionCap:TEXT",
+   "ReputationRaceMasks0:TEXT",
+   "ReputationRaceMasks1:TEXT",
+   "ReputationRaceMasks2:TEXT",
+   "ReputationRaceMasks3:TEXT"
+  ],
+  "Item": [
+   "ID:INTEGER",
+   "ClassID:INTEGER",
+   "SubclassID:INTEGER",
+   "Material:INTEGER",
+   "InventoryType:INTEGER",
+   "SheatheType:INTEGER",
+   "ItemPetFoodID:INTEGER",
+   "Sound_override_subclassID:INTEGER",
+   "IconFileDataID:INTEGER",
+   "ItemGroupSoundsID:INTEGER",
+   "ContentTuningID:INTEGER",
+   "ModifiedCraftingReagentItemID:INTEGER",
+   "AmmunitionType:INTEGER",
+   "CraftingQualityID:INTEGER",
+   "ItemSquishEraID:INTEGER",
+   "RecraftReagentCountPercentage:REAL",
+   "OrderSource:INTEGER"
+  ],
+  "ItemArmorQuality": [
+   "ID:INTEGER",
+   "Qualitymod:TEXT"
+  ],
+  "ItemArmorShield": [
+   "ID:INTEGER",
+   "Quality:TEXT",
+   "ItemLevel:INTEGER"
+  ],
+  "ItemArmorTotal": [
+   "ID:INTEGER",
+   "ItemLevel:INTEGER",
+   "Cloth:REAL",
+   "Leather:REAL",
+   "Mail:REAL",
+   "Plate:REAL"
+  ],
+  "ItemBonus": [
+   "ID:INTEGER",
+   "Value:TEXT",
+   "ParentItemBonusListID:INTEGER",
+   "Type:INTEGER",
+   "OrderIndex:INTEGER"
+  ],
+  "ItemBonusTreeNode": [
+   "ID:INTEGER",
+   "ItemContext:INTEGER",
+   "ChildItemBonusTreeID:INTEGER",
+   "ChildItemBonusListID:INTEGER",
+   "ChildItemLevelSelectorID:INTEGER",
+   "ChildItemBonusListGroupID:INTEGER",
+   "IblGroupPointsModSetID:INTEGER",
+   "MinMythicPlusLevel:INTEGER",
+   "MaxMythicPlusLevel:INTEGER",
+   "ItemCreationContextGroupID:INTEGER",
+   "Flags:INTEGER",
+   "ParentItemBonusTreeID:INTEGER"
+  ],
+  "ItemClass": [
+   "ID:INTEGER",
+   "ClassName_lang:TEXT",
+   "ClassID:INTEGER",
+   "PriceModifier:REAL",
+   "Flags:INTEGER"
+  ],
+  "ItemDamageAmmo": [
+   "ID:INTEGER",
+   "ItemLevel:INTEGER",
+   "Quality:TEXT"
+  ],
+  "ItemDamageOneHand": [
+   "ID:INTEGER",
+   "ItemLevel:INTEGER",
+   "Quality:TEXT"
+  ],
+  "ItemDamageOneHandCaster": [
+   "ID:INTEGER",
+   "ItemLevel:INTEGER",
+   "Quality:TEXT"
+  ],
+  "ItemDamageRanged": [
+   "ID:INTEGER",
+   "ItemLevel:INTEGER",
+   "Quality:TEXT"
+  ],
+  "ItemDamageThrown": [
+   "ID:INTEGER",
+   "ItemLevel:INTEGER",
+   "Quality:TEXT"
+  ],
+  "ItemDamageTwoHand": [
+   "ID:INTEGER",
+   "ItemLevel:INTEGER",
+   "Quality:TEXT"
+  ],
+  "ItemDamageTwoHandCaster": [
+   "ID:INTEGER",
+   "ItemLevel:INTEGER",
+   "Quality:TEXT"
+  ],
+  "ItemDamageWand": [
+   "ID:INTEGER",
+   "ItemLevel:INTEGER",
+   "Quality:TEXT"
+  ],
+  "ItemEffect": [
+   "ID:INTEGER",
+   "LegacySlotIndex:INTEGER",
+   "TriggerType:INTEGER",
+   "Charges:INTEGER",
+   "CoolDownMSec:INTEGER",
+   "CategoryCoolDownMSec:INTEGER",
+   "SpellCategoryID:INTEGER",
+   "SpellID:INTEGER",
+   "ChrSpecializationID:INTEGER",
+   "PlayerConditionID:INTEGER"
+  ],
+  "ItemExtendedCost": [
+   "ID:INTEGER",
+   "Money:INTEGER",
+   "RequiredArenaRating:INTEGER",
+   "ArenaBracket:INTEGER",
+   "Flags:INTEGER",
+   "MinFactionID:INTEGER",
+   "MinReputation:INTEGER",
+   "RequiredAchievement:INTEGER",
+   "ItemID:TEXT",
+   "ItemCount:TEXT",
+   "CurrencyID:TEXT",
+   "CurrencyCount:TEXT"
+  ],
+  "ItemNameDescription": [
+   "ID:INTEGER",
+   "Description_lang:TEXT",
+   "Color:INTEGER"
+  ],
+  "ItemReforge": [
+   "ID:INTEGER",
+   "Source_stat:INTEGER",
+   "Source_multiplier:REAL",
+   "Target_stat:INTEGER",
+   "Target_multiplier:REAL",
+   "Field_4_4_0_53627_004:INTEGER"
+  ],
+  "ItemSet": [
+   "ID:INTEGER",
+   "Name_lang:TEXT",
+   "SetFlags:INTEGER",
+   "RequiredSkill:INTEGER",
+   "RequiredSkillRank:INTEGER",
+   "ItemID:TEXT"
+  ],
+  "ItemSetSpell": [
+   "ID:INTEGER",
+   "ChrSpecID:INTEGER",
+   "SpellID:INTEGER",
+   "TraitSubTreeID:INTEGER",
+   "Threshold:INTEGER",
+   "ItemSetID:INTEGER"
+  ],
+  "ItemSparse": [
+   "ID:INTEGER",
+   "Description_lang:TEXT",
+   "Display3_lang:TEXT",
+   "Display2_lang:TEXT",
+   "Display1_lang:TEXT",
+   "Display_lang:TEXT",
+   "ExpansionID:INTEGER",
+   "DmgVariance:REAL",
+   "LimitCategory:INTEGER",
+   "DurationInInventory:INTEGER",
+   "QualityModifier:REAL",
+   "BagFamily:INTEGER",
+   "StartQuestID:INTEGER",
+   "LanguageID:INTEGER",
+   "ItemRange:REAL",
+   "StatPercentageOfSocket:TEXT",
+   "StatPercentEditor:TEXT",
+   "StatModifier_bonusStat:TEXT",
+   "Stackable:INTEGER",
+   "MaxCount:INTEGER",
+   "MinReputation:INTEGER",
+   "RequiredAbility:INTEGER",
+   "AllowableRace:TEXT",
+   "SellPrice:INTEGER",
+   "BuyPrice:INTEGER",
+   "VendorStackCount:INTEGER",
+   "PriceVariance:REAL",
+   "PriceRandomValue:REAL",
+   "Flags:TEXT",
+   "OppositeFactionItemID:INTEGER",
+   "ModifiedCraftingReagentItemID:INTEGER",
+   "ContentTuningID:INTEGER",
+   "PlayerLevelToItemLevelCurveID:INTEGER",
+   "ItemLevelOffsetCurveID:INTEGER",
+   "ItemLevelOffsetItemLevel:INTEGER",
+   "ItemSquishEraID:INTEGER",
+   "ItemNameDescriptionID:INTEGER",
+   "RequiredTransmogHoliday:INTEGER",
+   "RequiredHoliday:INTEGER",
+   "Gem_properties:INTEGER",
+   "Socket_match_enchantment_ID:INTEGER",
+   "TotemCategoryID:INTEGER",
+   "InstanceBound:INTEGER",
+   "ZoneBound:TEXT",
+   "ItemSet:INTEGER",
+   "LockID:INTEGER",
+   "PageID:INTEGER",
+   "ItemDelay:INTEGER",
+   "MinFactionID:INTEGER",
+   "RequiredSkillRank:INTEGER",
+   "RequiredSkill:INTEGER",
+   "ItemLevel:INTEGER",
+   "AllowableClass:INTEGER",
+   "ArtifactID:INTEGER",
+   "SpellWeight:INTEGER",
+   "SpellWeightCategory:INTEGER",
+   "SocketType:TEXT",
+   "SheatheType:INTEGER",
+   "Material:INTEGER",
+   "PageMaterialID:INTEGER",
+   "Bonding:INTEGER",
+   "DamageType:INTEGER",
+   "ContainerSlots:INTEGER",
+   "RequiredPVPMedal:INTEGER",
+   "RequiredPVPRank:INTEGER",
+   "RequiredLevel:INTEGER",
+   "InventoryType:INTEGER",
+   "OverallQualityID:INTEGER",
+   "AmmunitionType:INTEGER"
+  ],
+  "ItemSubClass": [
+   "DisplayName_lang:TEXT",
+   "VerboseName_lang:TEXT",
+   "ID:INTEGER",
+   "ClassID:INTEGER",
+   "SubClassID:INTEGER",
+   "AuctionHouseSortOrder:INTEGER",
+   "PrerequisiteProficiency:INTEGER",
+   "Flags:INTEGER",
+   "DisplayFlags:INTEGER",
+   "WeaponSwingSize:INTEGER",
+   "PostrequisiteProficiency:INTEGER"
+  ],
+  "ItemSubClassMask": [
+   "ID:INTEGER",
+   "Name_lang:TEXT",
+   "ClassID:INTEGER",
+   "Mask:INTEGER"
+  ],
+  "ItemXBonusTree": [
+   "ID:INTEGER",
+   "ItemBonusTreeID:INTEGER",
+   "ItemID:INTEGER"
+  ],
+  "ItemXItemEffect": [
+   "ID:INTEGER",
+   "ItemEffectID:INTEGER",
+   "ItemID:INTEGER"
+  ],
+  "JournalEncounter": [
+   "Name_lang:TEXT",
+   "Description_lang:TEXT",
+   "Map:TEXT",
+   "ID:INTEGER",
+   "JournalInstanceID:INTEGER",
+   "DungeonEncounterID:INTEGER",
+   "OrderIndex:INTEGER",
+   "FirstSectionID:INTEGER",
+   "UiMapID:INTEGER",
+   "MapDisplayConditionID:INTEGER",
+   "Flags:INTEGER",
+   "DifficultyMask:INTEGER"
+  ],
+  "JournalEncounterItem": [
+   "ID:INTEGER",
+   "JournalEncounterID:INTEGER",
+   "ItemID:INTEGER",
+   "FactionMask:INTEGER",
+   "Flags:INTEGER",
+   "DifficultyMask:INTEGER",
+   "DisplaySeasonID:INTEGER",
+   "WorldStateExpressionID:INTEGER"
+  ],
+  "Map": [
+   "ID:INTEGER",
+   "Directory:TEXT",
+   "MapName_lang:TEXT",
+   "MapDescription0_lang:TEXT",
+   "MapDescription1_lang:TEXT",
+   "PvpShortDescription_lang:TEXT",
+   "PvpLongDescription_lang:TEXT",
+   "Corpse:TEXT",
+   "MapType:INTEGER",
+   "InstanceType:INTEGER",
+   "ExpansionID:INTEGER",
+   "AreaTableID:INTEGER",
+   "LoadingScreenID:INTEGER",
+   "TimeOfDayOverride:INTEGER",
+   "ParentMapID:INTEGER",
+   "CosmeticParentMapID:INTEGER",
+   "TimeOffset:INTEGER",
+   "MinimapIconScale:REAL",
+   "CorpseMapID:INTEGER",
+   "MaxPlayers:INTEGER",
+   "WindSettingsID:INTEGER",
+   "ZmpFileDataID:INTEGER",
+   "WdtFileDataID:INTEGER",
+   "OceanLiquidTypeID:INTEGER",
+   "NavigationMaxDistance:INTEGER",
+   "PreloadFileDataID:INTEGER",
+   "Flags:TEXT"
+  ],
+  "PlayerExpectedStat": [
+   "ID:INTEGER",
+   "Level:INTEGER",
+   "ClassID:INTEGER",
+   "ContentSetID:INTEGER",
+   "BaseMana:INTEGER",
+   "HPPerStamina:INTEGER",
+   "Field_1_60_1_69876_006:INTEGER",
+   "CritPerAgility:REAL",
+   "SpellCritPerIntellect:REAL"
+  ],
+  "RandPropPoints": [
+   "ID:INTEGER",
+   "DamageReplaceStatF:REAL",
+   "DamageSecondaryF:REAL",
+   "DamageReplaceStat:INTEGER",
+   "DamageSecondary:INTEGER",
+   "EpicF:TEXT",
+   "SuperiorF:TEXT",
+   "GoodF:TEXT",
+   "Epic:TEXT",
+   "Superior:TEXT",
+   "Good:TEXT"
+  ],
+  "SkillLine": [
+   "DisplayName_lang:TEXT",
+   "AlternateVerb_lang:TEXT",
+   "Description_lang:TEXT",
+   "HordeDisplayName_lang:TEXT",
+   "NeutralDisplayName:TEXT",
+   "ID:INTEGER",
+   "CategoryID:INTEGER",
+   "SpellIconFileID:INTEGER",
+   "CanLink:INTEGER",
+   "ParentSkillLineID:INTEGER",
+   "ParentTierIndex:INTEGER",
+   "Flags:INTEGER",
+   "SpellBookSpellID:INTEGER",
+   "ExpansionNameSharedStringID:INTEGER",
+   "HordeExpansionNameSharedStringID:INTEGER"
+  ],
+  "SkillLineAbility": [
+   "AbilityVerb_lang:TEXT",
+   "AbilityAllVerb_lang:TEXT",
+   "ID:INTEGER",
+   "SkillLine:INTEGER",
+   "Spell:INTEGER",
+   "MinSkillLineRank:INTEGER",
+   "ClassMask:INTEGER",
+   "SupercedesSpell:INTEGER",
+   "AcquireMethod:INTEGER",
+   "TrivialSkillLineRankHigh:INTEGER",
+   "TrivialSkillLineRankLow:INTEGER",
+   "Flags:INTEGER",
+   "NumSkillUps:INTEGER",
+   "UniqueBit:INTEGER",
+   "TradeSkillCategoryID:INTEGER",
+   "SkillupSkillLineID:INTEGER",
+   "Field_5_5_4_67090_014:TEXT",
+   "RaceMasks:TEXT"
+  ],
+  "Spell": [
+   "ID:INTEGER",
+   "NameSubtext_lang:TEXT",
+   "Description_lang:TEXT",
+   "AuraDescription_lang:TEXT"
+  ],
+  "SpellAuraOptions": [
+   "ID:INTEGER",
+   "DifficultyID:INTEGER",
+   "CumulativeAura:INTEGER",
+   "ProcCategoryRecovery:INTEGER",
+   "ProcChance:INTEGER",
+   "ProcCharges:INTEGER",
+   "SpellProcsPerMinuteID:INTEGER",
+   "ProcTypeMask:TEXT",
+   "SpellID:INTEGER"
+  ],
+  "SpellAuraRestrictions": [
+   "ID:INTEGER",
+   "DifficultyID:INTEGER",
+   "CasterAuraState:INTEGER",
+   "TargetAuraState:INTEGER",
+   "ExcludeCasterAuraState:INTEGER",
+   "ExcludeTargetAuraState:INTEGER",
+   "CasterAuraSpell:INTEGER",
+   "TargetAuraSpell:INTEGER",
+   "ExcludeCasterAuraSpell:INTEGER",
+   "ExcludeTargetAuraSpell:INTEGER",
+   "CasterAuraType:INTEGER",
+   "TargetAuraType:INTEGER",
+   "ExcludeCasterAuraType:INTEGER",
+   "ExcludeTargetAuraType:INTEGER",
+   "SpellID:INTEGER"
+  ],
+  "SpellCastTimes": [
+   "ID:INTEGER",
+   "Base:INTEGER",
+   "Minimum:INTEGER"
+  ],
+  "SpellCastingRequirements": [
+   "ID:INTEGER",
+   "SpellID:INTEGER",
+   "FacingCasterFlags:INTEGER",
+   "MinFactionID:INTEGER",
+   "MinReputation:INTEGER",
+   "RequiredAreasID:INTEGER",
+   "RequiredAuraVision:INTEGER",
+   "RequiresSpellFocus:INTEGER"
+  ],
+  "SpellCategories": [
+   "ID:INTEGER",
+   "DifficultyID:INTEGER",
+   "Category:INTEGER",
+   "DefenseType:INTEGER",
+   "DiminishType:INTEGER",
+   "DispelType:INTEGER",
+   "Mechanic:INTEGER",
+   "PreventionType:INTEGER",
+   "StartRecoveryCategory:INTEGER",
+   "ChargeCategory:INTEGER",
+   "SpellID:INTEGER"
+  ],
+  "SpellCategory": [
+   "ID:INTEGER",
+   "Name_lang:TEXT",
+   "Flags:INTEGER",
+   "UsesPerWeek:INTEGER",
+   "MaxCharges:INTEGER",
+   "ChargeRecoveryTime:INTEGER",
+   "TypeMask:INTEGER"
+  ],
+  "SpellClassOptions": [
+   "ID:INTEGER",
+   "SpellID:INTEGER",
+   "ModalNextSpell:INTEGER",
+   "SpellClassSet:INTEGER",
+   "SpellClassMask:TEXT"
+  ],
+  "SpellCooldowns": [
+   "ID:INTEGER",
+   "DifficultyID:INTEGER",
+   "CategoryRecoveryTime:INTEGER",
+   "RecoveryTime:INTEGER",
+   "StartRecoveryTime:INTEGER",
+   "AuraSpellID:INTEGER",
+   "SpellID:INTEGER"
+  ],
+  "SpellDescriptionVariables": [
+   "ID:INTEGER",
+   "Variables:TEXT"
+  ],
+  "SpellDuration": [
+   "ID:INTEGER",
+   "Duration:INTEGER",
+   "MaxDuration:INTEGER",
+   "DurationPerResource:INTEGER"
+  ],
+  "SpellEffect": [
+   "ID:INTEGER",
+   "EffectAura:INTEGER",
+   "DifficultyID:INTEGER",
+   "EffectIndex:INTEGER",
+   "Effect:INTEGER",
+   "EffectAmplitude:REAL",
+   "EffectAttributes:INTEGER",
+   "EffectAuraPeriod:INTEGER",
+   "EffectBonusCoefficient:REAL",
+   "EffectChainAmplitude:REAL",
+   "EffectChainTargets:INTEGER",
+   "EffectItemType:INTEGER",
+   "EffectMechanic:INTEGER",
+   "EffectPointsPerResource:REAL",
+   "EffectPos_facing:REAL",
+   "EffectRealPointsPerLevel:REAL",
+   "EffectTriggerSpell:INTEGER",
+   "BonusCoefficientFromAP:REAL",
+   "PvpMultiplier:REAL",
+   "Coefficient:REAL",
+   "Variance:REAL",
+   "ResourceCoefficient:REAL",
+   "GroupSizeBasePointsCoefficient:REAL",
+   "EffectBasePointsF:REAL",
+   "ScalingClass:INTEGER",
+   "Node__Field_12_0_0_63534_001:INTEGER",
+   "EffectMiscValue:TEXT",
+   "EffectRadiusIndex:TEXT",
+   "EffectSpellClassMask:TEXT",
+   "ImplicitTarget:TEXT",
+   "SpellID:INTEGER"
+  ],
+  "SpellEquippedItems": [
+   "ID:INTEGER",
+   "SpellID:INTEGER",
+   "EquippedItemClass:INTEGER",
+   "EquippedItemInvTypes:INTEGER",
+   "EquippedItemSubclass:INTEGER"
+  ],
+  "SpellInterrupts": [
+   "ID:INTEGER",
+   "DifficultyID:INTEGER",
+   "InterruptFlags:INTEGER",
+   "AuraInterruptFlags:TEXT",
+   "ChannelInterruptFlags:TEXT",
+   "SpellID:INTEGER"
+  ],
+  "SpellItemEnchantment": [
+   "ID:INTEGER",
+   "Name_lang:TEXT",
+   "HordeName_lang:TEXT",
+   "Duration:INTEGER",
+   "Charges:INTEGER",
+   "Effect:TEXT",
+   "EffectPointsMin:TEXT",
+   "EffectArg:TEXT",
+   "Flags:INTEGER",
+   "EffectScalingPoints:TEXT",
+   "ScalingClass:INTEGER",
+   "ScalingClassRestricted:INTEGER",
+   "Condition_ID:INTEGER",
+   "RequiredSkillID:INTEGER",
+   "RequiredSkillRank:INTEGER",
+   "MinLevel:INTEGER",
+   "MaxLevel:INTEGER",
+   "IconFileDataID:INTEGER",
+   "ItemLevelMin:INTEGER",
+   "ItemLevelMax:INTEGER",
+   "TransmogUseConditionID:INTEGER",
+   "TransmogCost:INTEGER",
+   "ItemSquishEraID:INTEGER",
+   "ItemVisual:INTEGER",
+   "ItemLevel:INTEGER"
+  ],
+  "SpellLabel": [
+   "ID:INTEGER",
+   "LabelID:INTEGER",
+   "SpellID:INTEGER"
+  ],
+  "SpellLevels": [
+   "ID:INTEGER",
+   "DifficultyID:INTEGER",
+   "MaxLevel:INTEGER",
+   "MaxPassiveAuraLevel:INTEGER",
+   "BaseLevel:INTEGER",
+   "SpellLevel:INTEGER",
+   "SpellID:INTEGER"
+  ],
+  "SpellMechanic": [
+   "ID:INTEGER",
+   "StateName_lang:TEXT"
+  ],
+  "SpellMisc": [
+   "ID:INTEGER",
+   "Attributes:TEXT",
+   "DifficultyID:INTEGER",
+   "CastingTimeIndex:INTEGER",
+   "DurationIndex:INTEGER",
+   "PvPDurationIndex:INTEGER",
+   "RangeIndex:INTEGER",
+   "SchoolMask:INTEGER",
+   "Speed:REAL",
+   "LaunchDelay:REAL",
+   "MinDuration:REAL",
+   "SpellIconFileDataID:INTEGER",
+   "ActiveIconFileDataID:INTEGER",
+   "ContentTuningID:INTEGER",
+   "ShowFutureSpellPlayerConditionID:INTEGER",
+   "SpellVisualScript:INTEGER",
+   "ActiveSpellVisualScript:INTEGER",
+   "SpellID:INTEGER"
+  ],
+  "SpellName": [
+   "ID:INTEGER",
+   "Name_lang:TEXT"
+  ],
+  "SpellPower": [
+   "ID:INTEGER",
+   "OrderIndex:INTEGER",
+   "ManaCost:INTEGER",
+   "ManaCostPerLevel:INTEGER",
+   "ManaPerSecond:INTEGER",
+   "PowerDisplayID:INTEGER",
+   "AltPowerBarID:INTEGER",
+   "PowerCostPct:REAL",
+   "PowerCostMaxPct:REAL",
+   "OptionalCostPct:REAL",
+   "PowerPctPerSecond:REAL",
+   "PowerType:INTEGER",
+   "RequiredAuraSpellID:INTEGER",
+   "OptionalCost:INTEGER",
+   "SpellID:INTEGER"
+  ],
+  "SpellProcsPerMinute": [
+   "ID:INTEGER",
+   "BaseProcRate:REAL",
+   "Flags:INTEGER"
+  ],
+  "SpellProcsPerMinuteMod": [
+   "ID:INTEGER",
+   "Type:INTEGER",
+   "Param:INTEGER",
+   "Coeff:REAL",
+   "PlayerConditionID:INTEGER",
+   "SpellProcsPerMinuteID:INTEGER"
+  ],
+  "SpellRadius": [
+   "ID:INTEGER",
+   "Radius:REAL",
+   "RadiusPerLevel:REAL",
+   "RadiusMin:REAL",
+   "RadiusMax:REAL"
+  ],
+  "SpellRange": [
+   "ID:INTEGER",
+   "DisplayName_lang:TEXT",
+   "DisplayNameShort_lang:TEXT",
+   "Flags:INTEGER",
+   "RangeMin:TEXT",
+   "RangeMax:TEXT"
+  ],
+  "SpellReagents": [
+   "ID:INTEGER",
+   "SpellID:INTEGER",
+   "Reagent:TEXT",
+   "ReagentCount:TEXT",
+   "ReagentReCraftCount:TEXT",
+   "ReagentSource:TEXT"
+  ],
+  "SpellScaling": [
+   "ID:INTEGER",
+   "SpellID:INTEGER",
+   "MinScalingLevel:INTEGER",
+   "MaxScalingLevel:INTEGER"
+  ],
+  "SpellShapeshift": [
+   "ID:INTEGER",
+   "SpellID:INTEGER",
+   "StanceBarOrder:INTEGER",
+   "ShapeshiftExclude:TEXT",
+   "ShapeshiftMask:TEXT"
+  ],
+  "SpellShapeshiftForm": [
+   "ID:INTEGER",
+   "Name_lang:TEXT",
+   "CreatureDisplayID:INTEGER",
+   "CreatureType:INTEGER",
+   "Flags:INTEGER",
+   "AttackIconFileID:INTEGER",
+   "BonusActionBar:INTEGER",
+   "CombatRoundTime:INTEGER",
+   "DamageVariance:REAL",
+   "MountTypeID:INTEGER",
+   "PresetSpellID:TEXT"
+  ],
+  "SpellTargetRestrictions": [
+   "ID:INTEGER",
+   "DifficultyID:INTEGER",
+   "ConeDegrees:REAL",
+   "MaxTargets:INTEGER",
+   "MaxTargetLevel:INTEGER",
+   "TargetCreatureType:INTEGER",
+   "Targets:INTEGER",
+   "Width:REAL",
+   "SpellID:INTEGER"
+  ],
+  "SpellXDescriptionVariables": [
+   "ID:INTEGER",
+   "SpellID:INTEGER",
+   "SpellDescriptionVariablesID:INTEGER"
+  ],
+  "Talent": [
+   "ID:INTEGER",
+   "Description_lang:TEXT",
+   "TierID:INTEGER",
+   "Flags:INTEGER",
+   "ColumnIndex:INTEGER",
+   "TabID:INTEGER",
+   "ClassID:INTEGER",
+   "SpecID:INTEGER",
+   "SpellID:INTEGER",
+   "OverridesSpellID:INTEGER",
+   "RequiredSpellID:INTEGER",
+   "CategoryMask:TEXT",
+   "SpellRank:TEXT",
+   "PrereqTalent:TEXT",
+   "PrereqRank:TEXT"
+  ],
+  "TalentTab": [
+   "ID:INTEGER",
+   "Name_lang:TEXT",
+   "BackgroundFile:TEXT",
+   "Description_lang:TEXT",
+   "OrderIndex:INTEGER",
+   "Field_4_4_0_53627_004:INTEGER",
+   "ClassMask:INTEGER",
+   "CategoryEnumID:INTEGER",
+   "SpellIconID:INTEGER",
+   "RoleMask:INTEGER",
+   "MasterySpellID:TEXT"
+  ],
+  "TraitCond": [
+   "ID:INTEGER",
+   "CondType:INTEGER",
+   "TraitTreeID:INTEGER",
+   "GrantedRanks:INTEGER",
+   "QuestID:INTEGER",
+   "AchievementID:INTEGER",
+   "SpecSetID:INTEGER",
+   "TraitNodeGroupID:INTEGER",
+   "TraitNodeID:INTEGER",
+   "TraitNodeEntryID:INTEGER",
+   "TraitCurrencyID:INTEGER",
+   "SpentAmountRequired:INTEGER",
+   "Flags:INTEGER",
+   "RequiredLevel:INTEGER",
+   "FreeSharedStringID:INTEGER",
+   "SpendMoreSharedStringID:INTEGER",
+   "TraitCondAccountElementID:INTEGER"
+  ],
+  "TraitDefinition": [
+   "OverrideName_lang:TEXT",
+   "OverrideSubtext_lang:TEXT",
+   "OverrideDescription_lang:TEXT",
+   "ID:INTEGER",
+   "SpellID:INTEGER",
+   "OverrideIcon:INTEGER",
+   "OverridesSpellID:INTEGER",
+   "VisibleSpellID:INTEGER"
+  ],
+  "TraitDefinitionEffectPoints": [
+   "ID:INTEGER",
+   "TraitDefinitionID:INTEGER",
+   "EffectIndex:INTEGER",
+   "OperationType:INTEGER",
+   "CurveID:INTEGER"
+  ],
+  "TraitEdge": [
+   "ID:INTEGER",
+   "VisualStyle:INTEGER",
+   "LeftTraitNodeID:INTEGER",
+   "RightTraitNodeID:INTEGER",
+   "Type:INTEGER"
+  ],
+  "TraitNode": [
+   "ID:INTEGER",
+   "TraitTreeID:INTEGER",
+   "PosX:INTEGER",
+   "PosY:INTEGER",
+   "Type:INTEGER",
+   "Flags:INTEGER",
+   "TraitSubTreeID:INTEGER"
+  ],
+  "TraitNodeEntry": [
+   "ID:INTEGER",
+   "TraitDefinitionID:INTEGER",
+   "MaxRanks:INTEGER",
+   "NodeEntryType:INTEGER",
+   "TraitSubTreeID:INTEGER"
+  ],
+  "TraitNodeGroup": [
+   "ID:INTEGER",
+   "TraitTreeID:INTEGER",
+   "Flags:INTEGER"
+  ],
+  "TraitNodeGroupXTraitCond": [
+   "ID:INTEGER",
+   "TraitCondID:INTEGER",
+   "TraitNodeGroupID:INTEGER"
+  ],
+  "TraitNodeGroupXTraitNode": [
+   "ID:INTEGER",
+   "TraitNodeGroupID:INTEGER",
+   "TraitNodeID:INTEGER",
+   "Index:INTEGER"
+  ],
+  "TraitNodeXTraitCond": [
+   "ID:INTEGER",
+   "TraitCondID:INTEGER",
+   "TraitNodeID:INTEGER"
+  ],
+  "TraitNodeXTraitNodeEntry": [
+   "ID:INTEGER",
+   "TraitNodeID:INTEGER",
+   "TraitNodeEntryID:INTEGER",
+   "Index:INTEGER"
+  ],
+  "TraitSubTree": [
+   "Name_lang:TEXT",
+   "Description_lang:TEXT",
+   "ID:INTEGER",
+   "UiTextureAtlasElementID:INTEGER",
+   "TraitTreeID:INTEGER"
+  ],
+  "TraitTree": [
+   "TitleText_lang:TEXT",
+   "ID:INTEGER",
+   "TraitSystemID:INTEGER",
+   "TraitTreeID:INTEGER",
+   "FirstTraitNodeID:INTEGER",
+   "PlayerConditionID:INTEGER",
+   "Flags:INTEGER",
+   "Field_10_0_0_45697_006:REAL",
+   "Field_10_0_0_45697_007:REAL",
+   "UiTextureKitID:INTEGER"
+  ]
+ },
+ "schemaVersion": 1,
+ "version": "1.60.1.70685"
+}
