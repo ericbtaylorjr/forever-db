@@ -11,6 +11,8 @@ Dataset (and, later, browser) of every spell, item and piece of gear in WoW **Fo
 | `data/stat-names.json` | ITEM_MOD id → name for `computed.stats`. Generated. |
 | `data/state.json` | Last ingested build + hotfix push, hotfix-cache hash, per-table column layout, locked-row counts, per-ingest log. Generated. |
 | `pipeline/build_data.py` | Reads a db2tool SQLite dump, joins tables into records, diffs against `data/`, writes `data/`. Python stdlib only. |
+| `pipeline/site_data.py` | Builds the website's JSON from `data/` (`docs/site-data.md`). |
+| `pipeline/icon_names.py`, `scripts/gen_reference.py` | Icon names (side file `data/icon-names.json`) and effect/aura/power names (`site/src/data/reference.json`, from wowsims' enums). |
 | `pipeline/tooltips.py` | Renders spell description templates, or refuses (`docs/tooltips.md`). |
 | `pipeline/builds.py` | `check` (is there a new build/hotfix?) and `list` (historical builds + CDN config hashes from wago.tools). |
 | `pipeline/spikes/` | Throwaway prototypes (not production code), each pointing at the doc that explains it. |
@@ -49,8 +51,9 @@ python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would cha
 9. **Pin, don't float, the extraction tool.** `scan/forever-ref.txt` fixes the wowsims/forever commit. Bump it deliberately and review the first ingest after.
 10. **Keep dependencies on the latest stable release, explicitly pinned** (policy, versions and the upgrade routine are in `docs/update-runbook.md` → Dependencies). GitHub Actions are pinned by commit SHA; do not use floating tags like `@v4` or `latest`.
 11. **Item stats are derived, equip-effect stats are not merged.** `computed` comes from the budget tables; effects stay in `effects`. If you change the formula, the golden test must still pass and `data/` must be rebuilt (`scripts/backfill.sh`). Read `docs/item-stats-spike.md` first.
-12. **Rendered text never contains a guessed number.** `pipeline/tooltips.py` renders a template only if every token is exact; otherwise the text is `null`. Do not "fix" a refusal by guessing; add an exact rule with a test and the gamedata check (`docs/tooltips.md`).
-13. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
+12. **Encrypted is explicit.** Every item/spell has `discovery`; hidden ones are placeholders, never dropped or guessed (`docs/discovery.md`). A new `discovered` history event means the game revealed it.
+13. **Rendered text never contains a guessed number.** `pipeline/tooltips.py` renders a template only if every token is exact; otherwise the text is `null`. Do not "fix" a refusal by guessing; add an exact rule with a test and the gamedata check (`docs/tooltips.md`).
+14. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
 
 ## Conventions
 

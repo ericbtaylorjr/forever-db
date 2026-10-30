@@ -1,3 +1,6 @@
 .scan/
 __pycache__/
 *.pyc
+site/public/data/
+site/node_modules/
+site/dist/

@@ -1,66 +1,490 @@
 {
  "baselineBuild": 70245,
  "baselinePush": 0,
- "build": 70685,
+ "build": 70707,
  "builds": [
   {
    "build": 70245,
    "counts": {
     "items": {
-     "added": 19230,
+     "added": 31850,
      "changed": 0,
+     "discovered": 0,
      "removed": 0,
      "unchanged": 0
     },
     "spells": {
-     "added": 31747,
+     "added": 33091,
      "changed": 0,
+     "discovered": 0,
      "removed": 0,
      "unchanged": 0
     }
    },
+   "discovery": {
+    "items": {
+     "discovered": 19230,
+     "encrypted": 12620
+    },
+    "spells": {
+     "discovered": 31734,
+     "encrypted": 1357
+    }
+   },
    "hotfixPush": 0,
    "hotfixes": "none applied for build 70245",
+   "locked": {
+    "AreaTable": {
+     "0DA4670DB36FB2A9": 16,
+     "D2C028CB7AC14D0B": 29,
+     "DA0E7785727A0A65": 1
+    },
+    "Item": {
+     "DA0E7785727A0A65": 53
+    },
+    "ItemEffect": {
+     "057DC814574BD5B6": 7,
+     "DA0E7785727A0A65": 25
+    },
+    "ItemSparse": {
+     "DA0E7785727A0A65": 63
+    },
+    "ItemXItemEffect": {
+     "DA0E7785727A0A65": 32
+    },
+    "Map": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 5,
+     "DA0E7785727A0A65": 1
+    },
+    "SkillLineAbility": {
+     "057DC814574BD5B6": 1
+    },
+    "Spell": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 271,
+     "D2C028CB7AC14D0B": 128,
+     "DA0E7785727A0A65": 53
+    },
+    "SpellAuraOptions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 41,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellAuraRestrictions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 2,
+     "DA0E7785727A0A65": 9
+    },
+    "SpellCastingRequirements": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 16,
+     "DA0E7785727A0A65": 17
+    },
+    "SpellCategories": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 210,
+     "D2C028CB7AC14D0B": 106,
+     "DA0E7785727A0A65": 18
+    },
+    "SpellClassOptions": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 6
+    },
+    "SpellCooldowns": {
+     "057DC814574BD5B6": 5,
+     "0DA4670DB36FB2A9": 30,
+     "D2C028CB7AC14D0B": 21,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellEffect": {
+     "057DC814574BD5B6": 62,
+     "0DA4670DB36FB2A9": 650,
+     "D2C028CB7AC14D0B": 340,
+     "DA0E7785727A0A65": 200
+    },
+    "SpellEquippedItems": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 9
+    },
+    "SpellInterrupts": {
+     "057DC814574BD5B6": 8,
+     "0DA4670DB36FB2A9": 173,
+     "D2C028CB7AC14D0B": 94,
+     "DA0E7785727A0A65": 33
+    },
+    "SpellItemEnchantment": {
+     "057DC814574BD5B6": 1
+    },
+    "SpellLabel": {
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 3,
+     "DA0E7785727A0A65": 23
+    },
+    "SpellLevels": {
+     "0DA4670DB36FB2A9": 84,
+     "D2C028CB7AC14D0B": 63,
+     "DA0E7785727A0A65": 2
+    },
+    "SpellMisc": {
+     "057DC814574BD5B6": 50,
+     "0DA4670DB36FB2A9": 495,
+     "D2C028CB7AC14D0B": 250,
+     "DA0E7785727A0A65": 102
+    },
+    "SpellName": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 286,
+     "D2C028CB7AC14D0B": 173,
+     "DA0E7785727A0A65": 84
+    },
+    "SpellPower": {
+     "0DA4670DB36FB2A9": 13,
+     "D2C028CB7AC14D0B": 24
+    },
+    "SpellReagents": {
+     "057DC814574BD5B6": 3,
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 16
+    },
+    "SpellTargetRestrictions": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 96,
+     "D2C028CB7AC14D0B": 24,
+     "DA0E7785727A0A65": 12
+    }
+   },
    "version": "1.60.1.70245"
   },
   {
    "build": 70532,
    "counts": {
     "items": {
-     "added": 47,
-     "changed": 500,
-     "removed": 20,
-     "unchanged": 18710
+     "added": 52,
+     "changed": 572,
+     "discovered": 3,
+     "removed": 4,
+     "unchanged": 31274
     },
     "spells": {
-     "added": 223,
-     "changed": 2177,
+     "added": 227,
+     "changed": 2178,
+     "discovered": 1,
      "removed": 8,
-     "unchanged": 29562
+     "unchanged": 30905
+    }
+   },
+   "discovery": {
+    "items": {
+     "discovered": 19257,
+     "encrypted": 12641
+    },
+    "spells": {
+     "discovered": 31949,
+     "encrypted": 1361
     }
    },
    "hotfixPush": 0,
    "hotfixes": "none applied for build 70532",
+   "locked": {
+    "AreaTable": {
+     "0DA4670DB36FB2A9": 16,
+     "D2C028CB7AC14D0B": 29,
+     "DA0E7785727A0A65": 1
+    },
+    "Item": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 53
+    },
+    "ItemEffect": {
+     "057DC814574BD5B6": 7,
+     "DA0E7785727A0A65": 25
+    },
+    "ItemSparse": {
+     "DA0E7785727A0A65": 63
+    },
+    "ItemXItemEffect": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 32
+    },
+    "Map": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 5,
+     "DA0E7785727A0A65": 1
+    },
+    "SkillLineAbility": {
+     "057DC814574BD5B6": 1
+    },
+    "Spell": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 275,
+     "D2C028CB7AC14D0B": 129,
+     "DA0E7785727A0A65": 53
+    },
+    "SpellAuraOptions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 40,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellAuraRestrictions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 2,
+     "DA0E7785727A0A65": 9
+    },
+    "SpellCastingRequirements": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 16,
+     "DA0E7785727A0A65": 17
+    },
+    "SpellCategories": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 215,
+     "D2C028CB7AC14D0B": 107,
+     "DA0E7785727A0A65": 18
+    },
+    "SpellClassOptions": {
+     "0DA4670DB36FB2A9": 3,
+     "D2C028CB7AC14D0B": 6
+    },
+    "SpellCooldowns": {
+     "057DC814574BD5B6": 5,
+     "0DA4670DB36FB2A9": 34,
+     "D2C028CB7AC14D0B": 21,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellEffect": {
+     "057DC814574BD5B6": 62,
+     "0DA4670DB36FB2A9": 657,
+     "D2C028CB7AC14D0B": 382,
+     "DA0E7785727A0A65": 200
+    },
+    "SpellEquippedItems": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 9
+    },
+    "SpellInterrupts": {
+     "057DC814574BD5B6": 8,
+     "0DA4670DB36FB2A9": 179,
+     "D2C028CB7AC14D0B": 94,
+     "DA0E7785727A0A65": 33
+    },
+    "SpellItemEnchantment": {
+     "057DC814574BD5B6": 1
+    },
+    "SpellLabel": {
+     "0DA4670DB36FB2A9": 10,
+     "D2C028CB7AC14D0B": 3,
+     "DA0E7785727A0A65": 23
+    },
+    "SpellLevels": {
+     "0DA4670DB36FB2A9": 88,
+     "D2C028CB7AC14D0B": 64,
+     "DA0E7785727A0A65": 2
+    },
+    "SpellMisc": {
+     "057DC814574BD5B6": 50,
+     "0DA4670DB36FB2A9": 501,
+     "D2C028CB7AC14D0B": 292,
+     "DA0E7785727A0A65": 102
+    },
+    "SpellName": {
+     "057DC814574BD5B6": 17,
+     "0DA4670DB36FB2A9": 290,
+     "D2C028CB7AC14D0B": 215,
+     "DA0E7785727A0A65": 84
+    },
+    "SpellPower": {
+     "0DA4670DB36FB2A9": 17,
+     "D2C028CB7AC14D0B": 24
+    },
+    "SpellReagents": {
+     "057DC814574BD5B6": 3,
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 16
+    },
+    "SpellShapeshift": {
+     "0DA4670DB36FB2A9": 1
+    },
+    "SpellTargetRestrictions": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 98,
+     "D2C028CB7AC14D0B": 24,
+     "DA0E7785727A0A65": 12
+    }
+   },
    "version": "1.60.1.70532"
   },
   {
    "build": 70630,
    "counts": {
     "items": {
-     "added": 0,
-     "changed": 28,
+     "added": 1,
+     "changed": 30,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 19229
+     "unchanged": 31868
     },
     "spells": {
      "added": 9,
      "changed": 131,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 31831
+     "unchanged": 33179
+    }
+   },
+   "discovery": {
+    "items": {
+     "discovered": 19257,
+     "encrypted": 12642
+    },
+    "spells": {
+     "discovered": 31958,
+     "encrypted": 1361
     }
    },
    "hotfixPush": 0,
    "hotfixes": "none applied for build 70630",
+   "locked": {
+    "AreaTable": {
+     "0DA4670DB36FB2A9": 16,
+     "D2C028CB7AC14D0B": 29,
+     "DA0E7785727A0A65": 1
+    },
+    "Item": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 53
+    },
+    "ItemEffect": {
+     "057DC814574BD5B6": 7,
+     "DA0E7785727A0A65": 25
+    },
+    "ItemSparse": {
+     "DA0E7785727A0A65": 63
+    },
+    "ItemXItemEffect": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 32
+    },
+    "Map": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 5,
+     "DA0E7785727A0A65": 1
+    },
+    "SkillLineAbility": {
+     "057DC814574BD5B6": 1
+    },
+    "Spell": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 275,
+     "D2C028CB7AC14D0B": 129,
+     "DA0E7785727A0A65": 53
+    },
+    "SpellAuraOptions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 40,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellAuraRestrictions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 2,
+     "DA0E7785727A0A65": 9
+    },
+    "SpellCastingRequirements": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 16,
+     "DA0E7785727A0A65": 17
+    },
+    "SpellCategories": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 215,
+     "D2C028CB7AC14D0B": 107,
+     "DA0E7785727A0A65": 18
+    },
+    "SpellClassOptions": {
+     "0DA4670DB36FB2A9": 3,
+     "D2C028CB7AC14D0B": 6
+    },
+    "SpellCooldowns": {
+     "057DC814574BD5B6": 5,
+     "0DA4670DB36FB2A9": 34,
+     "D2C028CB7AC14D0B": 21,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellEffect": {
+     "057DC814574BD5B6": 62,
+     "0DA4670DB36FB2A9": 657,
+     "D2C028CB7AC14D0B": 382,
+     "DA0E7785727A0A65": 200
+    },
+    "SpellEquippedItems": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 9
+    },
+    "SpellInterrupts": {
+     "057DC814574BD5B6": 8,
+     "0DA4670DB36FB2A9": 179,
+     "D2C028CB7AC14D0B": 94,
+     "DA0E7785727A0A65": 33
+    },
+    "SpellItemEnchantment": {
+     "057DC814574BD5B6": 1
+    },
+    "SpellLabel": {
+     "0DA4670DB36FB2A9": 10,
+     "D2C028CB7AC14D0B": 3,
+     "DA0E7785727A0A65": 23
+    },
+    "SpellLevels": {
+     "0DA4670DB36FB2A9": 88,
+     "D2C028CB7AC14D0B": 64,
+     "DA0E7785727A0A65": 2
+    },
+    "SpellMisc": {
+     "057DC814574BD5B6": 50,
+     "0DA4670DB36FB2A9": 501,
+     "D2C028CB7AC14D0B": 292,
+     "DA0E7785727A0A65": 102
+    },
+    "SpellName": {
+     "057DC814574BD5B6": 17,
+     "0DA4670DB36FB2A9": 290,
+     "D2C028CB7AC14D0B": 215,
+     "DA0E7785727A0A65": 84
+    },
+    "SpellPower": {
+     "0DA4670DB36FB2A9": 17,
+     "D2C028CB7AC14D0B": 24
+    },
+    "SpellReagents": {
+     "057DC814574BD5B6": 3,
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 16
+    },
+    "SpellShapeshift": {
+     "0DA4670DB36FB2A9": 1
+    },
+    "SpellTargetRestrictions": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 98,
+     "D2C028CB7AC14D0B": 24,
+     "DA0E7785727A0A65": 12
+    }
+   },
    "version": "1.60.1.70630"
   },
   {
@@ -69,18 +493,161 @@
     "items": {
      "added": 0,
      "changed": 0,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 19257
+     "unchanged": 31899
     },
     "spells": {
      "added": 0,
      "changed": 0,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 31971
+     "unchanged": 33319
+    }
+   },
+   "discovery": {
+    "items": {
+     "discovered": 19257,
+     "encrypted": 12642
+    },
+    "spells": {
+     "discovered": 31958,
+     "encrypted": 1361
     }
    },
    "hotfixPush": 0,
    "hotfixes": "none applied for build 70634",
+   "locked": {
+    "AreaTable": {
+     "0DA4670DB36FB2A9": 16,
+     "D2C028CB7AC14D0B": 29,
+     "DA0E7785727A0A65": 1
+    },
+    "Item": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 53
+    },
+    "ItemEffect": {
+     "057DC814574BD5B6": 7,
+     "DA0E7785727A0A65": 25
+    },
+    "ItemSparse": {
+     "DA0E7785727A0A65": 63
+    },
+    "ItemXItemEffect": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 32
+    },
+    "Map": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 5,
+     "DA0E7785727A0A65": 1
+    },
+    "SkillLineAbility": {
+     "057DC814574BD5B6": 1
+    },
+    "Spell": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 275,
+     "D2C028CB7AC14D0B": 129,
+     "DA0E7785727A0A65": 53
+    },
+    "SpellAuraOptions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 40,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellAuraRestrictions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 2,
+     "DA0E7785727A0A65": 9
+    },
+    "SpellCastingRequirements": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 16,
+     "DA0E7785727A0A65": 17
+    },
+    "SpellCategories": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 215,
+     "D2C028CB7AC14D0B": 107,
+     "DA0E7785727A0A65": 18
+    },
+    "SpellClassOptions": {
+     "0DA4670DB36FB2A9": 3,
+     "D2C028CB7AC14D0B": 6
+    },
+    "SpellCooldowns": {
+     "057DC814574BD5B6": 5,
+     "0DA4670DB36FB2A9": 34,
+     "D2C028CB7AC14D0B": 21,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellEffect": {
+     "057DC814574BD5B6": 62,
+     "0DA4670DB36FB2A9": 657,
+     "D2C028CB7AC14D0B": 382,
+     "DA0E7785727A0A65": 200
+    },
+    "SpellEquippedItems": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 9
+    },
+    "SpellInterrupts": {
+     "057DC814574BD5B6": 8,
+     "0DA4670DB36FB2A9": 179,
+     "D2C028CB7AC14D0B": 94,
+     "DA0E7785727A0A65": 33
+    },
+    "SpellItemEnchantment": {
+     "057DC814574BD5B6": 1
+    },
+    "SpellLabel": {
+     "0DA4670DB36FB2A9": 10,
+     "D2C028CB7AC14D0B": 3,
+     "DA0E7785727A0A65": 23
+    },
+    "SpellLevels": {
+     "0DA4670DB36FB2A9": 88,
+     "D2C028CB7AC14D0B": 64,
+     "DA0E7785727A0A65": 2
+    },
+    "SpellMisc": {
+     "057DC814574BD5B6": 50,
+     "0DA4670DB36FB2A9": 501,
+     "D2C028CB7AC14D0B": 292,
+     "DA0E7785727A0A65": 102
+    },
+    "SpellName": {
+     "057DC814574BD5B6": 17,
+     "0DA4670DB36FB2A9": 290,
+     "D2C028CB7AC14D0B": 215,
+     "DA0E7785727A0A65": 84
+    },
+    "SpellPower": {
+     "0DA4670DB36FB2A9": 17,
+     "D2C028CB7AC14D0B": 24
+    },
+    "SpellReagents": {
+     "057DC814574BD5B6": 3,
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 16
+    },
+    "SpellShapeshift": {
+     "0DA4670DB36FB2A9": 1
+    },
+    "SpellTargetRestrictions": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 98,
+     "D2C028CB7AC14D0B": 24,
+     "DA0E7785727A0A65": 12
+    }
+   },
    "version": "1.60.1.70634"
   },
   {
@@ -89,18 +656,161 @@
     "items": {
      "added": 0,
      "changed": 0,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 19257
+     "unchanged": 31899
     },
     "spells": {
      "added": 0,
      "changed": 0,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 31971
+     "unchanged": 33319
+    }
+   },
+   "discovery": {
+    "items": {
+     "discovered": 19257,
+     "encrypted": 12642
+    },
+    "spells": {
+     "discovered": 31958,
+     "encrypted": 1361
     }
    },
    "hotfixPush": 0,
    "hotfixes": "none applied for build 70658",
+   "locked": {
+    "AreaTable": {
+     "0DA4670DB36FB2A9": 16,
+     "D2C028CB7AC14D0B": 29,
+     "DA0E7785727A0A65": 1
+    },
+    "Item": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 53
+    },
+    "ItemEffect": {
+     "057DC814574BD5B6": 7,
+     "DA0E7785727A0A65": 25
+    },
+    "ItemSparse": {
+     "DA0E7785727A0A65": 63
+    },
+    "ItemXItemEffect": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 32
+    },
+    "Map": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 5,
+     "DA0E7785727A0A65": 1
+    },
+    "SkillLineAbility": {
+     "057DC814574BD5B6": 1
+    },
+    "Spell": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 275,
+     "D2C028CB7AC14D0B": 129,
+     "DA0E7785727A0A65": 53
+    },
+    "SpellAuraOptions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 40,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellAuraRestrictions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 2,
+     "DA0E7785727A0A65": 9
+    },
+    "SpellCastingRequirements": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 16,
+     "DA0E7785727A0A65": 17
+    },
+    "SpellCategories": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 215,
+     "D2C028CB7AC14D0B": 107,
+     "DA0E7785727A0A65": 18
+    },
+    "SpellClassOptions": {
+     "0DA4670DB36FB2A9": 3,
+     "D2C028CB7AC14D0B": 6
+    },
+    "SpellCooldowns": {
+     "057DC814574BD5B6": 5,
+     "0DA4670DB36FB2A9": 34,
+     "D2C028CB7AC14D0B": 21,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellEffect": {
+     "057DC814574BD5B6": 62,
+     "0DA4670DB36FB2A9": 657,
+     "D2C028CB7AC14D0B": 382,
+     "DA0E7785727A0A65": 200
+    },
+    "SpellEquippedItems": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 9
+    },
+    "SpellInterrupts": {
+     "057DC814574BD5B6": 8,
+     "0DA4670DB36FB2A9": 179,
+     "D2C028CB7AC14D0B": 94,
+     "DA0E7785727A0A65": 33
+    },
+    "SpellItemEnchantment": {
+     "057DC814574BD5B6": 1
+    },
+    "SpellLabel": {
+     "0DA4670DB36FB2A9": 10,
+     "D2C028CB7AC14D0B": 3,
+     "DA0E7785727A0A65": 23
+    },
+    "SpellLevels": {
+     "0DA4670DB36FB2A9": 88,
+     "D2C028CB7AC14D0B": 64,
+     "DA0E7785727A0A65": 2
+    },
+    "SpellMisc": {
+     "057DC814574BD5B6": 50,
+     "0DA4670DB36FB2A9": 501,
+     "D2C028CB7AC14D0B": 292,
+     "DA0E7785727A0A65": 102
+    },
+    "SpellName": {
+     "057DC814574BD5B6": 17,
+     "0DA4670DB36FB2A9": 290,
+     "D2C028CB7AC14D0B": 215,
+     "DA0E7785727A0A65": 84
+    },
+    "SpellPower": {
+     "0DA4670DB36FB2A9": 17,
+     "D2C028CB7AC14D0B": 24
+    },
+    "SpellReagents": {
+     "057DC814574BD5B6": 3,
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 16
+    },
+    "SpellShapeshift": {
+     "0DA4670DB36FB2A9": 1
+    },
+    "SpellTargetRestrictions": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 98,
+     "D2C028CB7AC14D0B": 24,
+     "DA0E7785727A0A65": 12
+    }
+   },
    "version": "1.60.1.70658"
   },
   {
@@ -109,60 +819,642 @@
     "items": {
      "added": 0,
      "changed": 1,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 19256
+     "unchanged": 31898
     },
     "spells": {
      "added": 1,
      "changed": 2,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 31969
+     "unchanged": 33317
+    }
+   },
+   "discovery": {
+    "items": {
+     "discovered": 19257,
+     "encrypted": 12642
+    },
+    "spells": {
+     "discovered": 31959,
+     "encrypted": 1361
     }
    },
    "hotfixPush": 0,
    "hotfixes": "none applied for build 70685",
+   "locked": {
+    "AreaTable": {
+     "0DA4670DB36FB2A9": 16,
+     "D2C028CB7AC14D0B": 29,
+     "DA0E7785727A0A65": 1
+    },
+    "Item": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 53
+    },
+    "ItemEffect": {
+     "057DC814574BD5B6": 7,
+     "DA0E7785727A0A65": 25
+    },
+    "ItemSparse": {
+     "DA0E7785727A0A65": 63
+    },
+    "ItemXItemEffect": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 32
+    },
+    "Map": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 5,
+     "DA0E7785727A0A65": 1
+    },
+    "SkillLineAbility": {
+     "057DC814574BD5B6": 1
+    },
+    "Spell": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 275,
+     "D2C028CB7AC14D0B": 129,
+     "DA0E7785727A0A65": 53
+    },
+    "SpellAuraOptions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 40,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellAuraRestrictions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 2,
+     "DA0E7785727A0A65": 9
+    },
+    "SpellCastingRequirements": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 16,
+     "DA0E7785727A0A65": 17
+    },
+    "SpellCategories": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 215,
+     "D2C028CB7AC14D0B": 107,
+     "DA0E7785727A0A65": 18
+    },
+    "SpellClassOptions": {
+     "0DA4670DB36FB2A9": 3,
+     "D2C028CB7AC14D0B": 6
+    },
+    "SpellCooldowns": {
+     "057DC814574BD5B6": 5,
+     "0DA4670DB36FB2A9": 34,
+     "D2C028CB7AC14D0B": 21,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellEffect": {
+     "057DC814574BD5B6": 62,
+     "0DA4670DB36FB2A9": 657,
+     "D2C028CB7AC14D0B": 382,
+     "DA0E7785727A0A65": 200
+    },
+    "SpellEquippedItems": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 9
+    },
+    "SpellInterrupts": {
+     "057DC814574BD5B6": 8,
+     "0DA4670DB36FB2A9": 179,
+     "D2C028CB7AC14D0B": 94,
+     "DA0E7785727A0A65": 33
+    },
+    "SpellItemEnchantment": {
+     "057DC814574BD5B6": 1
+    },
+    "SpellLabel": {
+     "0DA4670DB36FB2A9": 10,
+     "D2C028CB7AC14D0B": 3,
+     "DA0E7785727A0A65": 23
+    },
+    "SpellLevels": {
+     "0DA4670DB36FB2A9": 88,
+     "D2C028CB7AC14D0B": 64,
+     "DA0E7785727A0A65": 2
+    },
+    "SpellMisc": {
+     "057DC814574BD5B6": 50,
+     "0DA4670DB36FB2A9": 501,
+     "D2C028CB7AC14D0B": 292,
+     "DA0E7785727A0A65": 102
+    },
+    "SpellName": {
+     "057DC814574BD5B6": 17,
+     "0DA4670DB36FB2A9": 290,
+     "D2C028CB7AC14D0B": 215,
+     "DA0E7785727A0A65": 84
+    },
+    "SpellPower": {
+     "0DA4670DB36FB2A9": 17,
+     "D2C028CB7AC14D0B": 24
+    },
+    "SpellReagents": {
+     "057DC814574BD5B6": 3,
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 16
+    },
+    "SpellShapeshift": {
+     "0DA4670DB36FB2A9": 1
+    },
+    "SpellTargetRestrictions": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 98,
+     "D2C028CB7AC14D0B": 24,
+     "DA0E7785727A0A65": 12
+    }
+   },
    "version": "1.60.1.70685"
   },
   {
-   "build": 70685,
+   "build": 70707,
    "counts": {
     "items": {
-     "added": 478,
-     "changed": 46,
+     "added": 106,
+     "changed": 48,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 19211
+     "unchanged": 31851
     },
     "spells": {
-     "added": 59,
-     "changed": 144,
+     "added": 60,
+     "changed": 150,
+     "discovered": 0,
+     "removed": 1,
+     "unchanged": 33169
+    }
+   },
+   "discovery": {
+    "items": {
+     "discovered": 19267,
+     "encrypted": 12738
+    },
+    "spells": {
+     "discovered": 32017,
+     "encrypted": 1362
+    }
+   },
+   "hotfixPush": 0,
+   "hotfixes": "none applied for build 70707",
+   "locked": {
+    "AreaTable": {
+     "0DA4670DB36FB2A9": 16,
+     "D2C028CB7AC14D0B": 29,
+     "DA0E7785727A0A65": 1
+    },
+    "Item": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 53
+    },
+    "ItemEffect": {
+     "057DC814574BD5B6": 7,
+     "DA0E7785727A0A65": 25
+    },
+    "ItemSparse": {
+     "DA0E7785727A0A65": 63
+    },
+    "ItemXItemEffect": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 32
+    },
+    "Map": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 5,
+     "DA0E7785727A0A65": 1
+    },
+    "SkillLineAbility": {
+     "057DC814574BD5B6": 1
+    },
+    "Spell": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 278,
+     "D2C028CB7AC14D0B": 129,
+     "DA0E7785727A0A65": 53
+    },
+    "SpellAuraOptions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 40,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellAuraRestrictions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 2,
+     "DA0E7785727A0A65": 9
+    },
+    "SpellCastingRequirements": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 16,
+     "DA0E7785727A0A65": 17
+    },
+    "SpellCategories": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 219,
+     "D2C028CB7AC14D0B": 107,
+     "DA0E7785727A0A65": 18
+    },
+    "SpellClassOptions": {
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 6
+    },
+    "SpellCooldowns": {
+     "057DC814574BD5B6": 5,
+     "0DA4670DB36FB2A9": 38,
+     "D2C028CB7AC14D0B": 21,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellEffect": {
+     "057DC814574BD5B6": 62,
+     "0DA4670DB36FB2A9": 665,
+     "D2C028CB7AC14D0B": 382,
+     "DA0E7785727A0A65": 200
+    },
+    "SpellEquippedItems": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 9
+    },
+    "SpellInterrupts": {
+     "057DC814574BD5B6": 8,
+     "0DA4670DB36FB2A9": 187,
+     "D2C028CB7AC14D0B": 94,
+     "DA0E7785727A0A65": 33
+    },
+    "SpellItemEnchantment": {
+     "057DC814574BD5B6": 1
+    },
+    "SpellLabel": {
+     "0DA4670DB36FB2A9": 18,
+     "D2C028CB7AC14D0B": 3,
+     "DA0E7785727A0A65": 23
+    },
+    "SpellLevels": {
+     "0DA4670DB36FB2A9": 93,
+     "D2C028CB7AC14D0B": 64,
+     "DA0E7785727A0A65": 2
+    },
+    "SpellMisc": {
+     "057DC814574BD5B6": 50,
+     "0DA4670DB36FB2A9": 509,
+     "D2C028CB7AC14D0B": 292,
+     "DA0E7785727A0A65": 102
+    },
+    "SpellName": {
+     "057DC814574BD5B6": 17,
+     "0DA4670DB36FB2A9": 293,
+     "D2C028CB7AC14D0B": 215,
+     "DA0E7785727A0A65": 84
+    },
+    "SpellPower": {
+     "0DA4670DB36FB2A9": 22,
+     "D2C028CB7AC14D0B": 24
+    },
+    "SpellReagents": {
+     "057DC814574BD5B6": 3,
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 16
+    },
+    "SpellShapeshift": {
+     "0DA4670DB36FB2A9": 2
+    },
+    "SpellTargetRestrictions": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 97,
+     "D2C028CB7AC14D0B": 24,
+     "DA0E7785727A0A65": 12
+    }
+   },
+   "version": "1.60.1.70707"
+  },
+  {
+   "build": 70707,
+   "counts": {
+    "items": {
+     "added": 0,
+     "changed": 567,
+     "discovered": 468,
+     "removed": 65,
+     "unchanged": 31373
+    },
+    "spells": {
+     "added": 0,
+     "changed": 0,
+     "discovered": 0,
      "removed": 0,
-     "unchanged": 31828
+     "unchanged": 33379
+    }
+   },
+   "discovery": {
+    "items": {
+     "discovered": 19735,
+     "encrypted": 12205
+    },
+    "spells": {
+     "discovered": 32017,
+     "encrypted": 1362
     }
    },
    "hotfixPush": 113511,
-   "hotfixes": "build 70685 up to push 113511",
-   "version": "1.60.1.70685"
+   "hotfixes": "build 70707 up to push 113511, carried from build 70685",
+   "locked": {
+    "AreaTable": {
+     "0DA4670DB36FB2A9": 16,
+     "D2C028CB7AC14D0B": 29,
+     "DA0E7785727A0A65": 1
+    },
+    "Item": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 53
+    },
+    "ItemEffect": {
+     "057DC814574BD5B6": 7,
+     "DA0E7785727A0A65": 25
+    },
+    "ItemSparse": {
+     "DA0E7785727A0A65": 63
+    },
+    "ItemXItemEffect": {
+     "D2C028CB7AC14D0B": 1,
+     "DA0E7785727A0A65": 32
+    },
+    "Map": {
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 5,
+     "DA0E7785727A0A65": 1
+    },
+    "SkillLineAbility": {
+     "057DC814574BD5B6": 1
+    },
+    "Spell": {
+     "057DC814574BD5B6": 16,
+     "0DA4670DB36FB2A9": 278,
+     "D2C028CB7AC14D0B": 129,
+     "DA0E7785727A0A65": 53
+    },
+    "SpellAuraOptions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 40,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellAuraRestrictions": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 2,
+     "DA0E7785727A0A65": 9
+    },
+    "SpellCastingRequirements": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 16,
+     "DA0E7785727A0A65": 17
+    },
+    "SpellCategories": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 219,
+     "D2C028CB7AC14D0B": 107,
+     "DA0E7785727A0A65": 18
+    },
+    "SpellClassOptions": {
+     "0DA4670DB36FB2A9": 5,
+     "D2C028CB7AC14D0B": 6
+    },
+    "SpellCooldowns": {
+     "057DC814574BD5B6": 5,
+     "0DA4670DB36FB2A9": 38,
+     "D2C028CB7AC14D0B": 21,
+     "DA0E7785727A0A65": 8
+    },
+    "SpellEffect": {
+     "057DC814574BD5B6": 62,
+     "0DA4670DB36FB2A9": 665,
+     "D2C028CB7AC14D0B": 382,
+     "DA0E7785727A0A65": 200
+    },
+    "SpellEquippedItems": {
+     "057DC814574BD5B6": 1,
+     "0DA4670DB36FB2A9": 7,
+     "D2C028CB7AC14D0B": 9
+    },
+    "SpellInterrupts": {
+     "057DC814574BD5B6": 8,
+     "0DA4670DB36FB2A9": 187,
+     "D2C028CB7AC14D0B": 94,
+     "DA0E7785727A0A65": 33
+    },
+    "SpellItemEnchantment": {
+     "057DC814574BD5B6": 1
+    },
+    "SpellLabel": {
+     "0DA4670DB36FB2A9": 18,
+     "D2C028CB7AC14D0B": 3,
+     "DA0E7785727A0A65": 23
+    },
+    "SpellLevels": {
+     "0DA4670DB36FB2A9": 93,
+     "D2C028CB7AC14D0B": 64,
+     "DA0E7785727A0A65": 2
+    },
+    "SpellMisc": {
+     "057DC814574BD5B6": 50,
+     "0DA4670DB36FB2A9": 509,
+     "D2C028CB7AC14D0B": 292,
+     "DA0E7785727A0A65": 102
+    },
+    "SpellName": {
+     "057DC814574BD5B6": 17,
+     "0DA4670DB36FB2A9": 293,
+     "D2C028CB7AC14D0B": 215,
+     "DA0E7785727A0A65": 84
+    },
+    "SpellPower": {
+     "0DA4670DB36FB2A9": 22,
+     "D2C028CB7AC14D0B": 24
+    },
+    "SpellReagents": {
+     "057DC814574BD5B6": 3,
+     "0DA4670DB36FB2A9": 2,
+     "D2C028CB7AC14D0B": 17,
+     "DA0E7785727A0A65": 16
+    },
+    "SpellShapeshift": {
+     "0DA4670DB36FB2A9": 2
+    },
+    "SpellTargetRestrictions": {
+     "057DC814574BD5B6": 4,
+     "0DA4670DB36FB2A9": 97,
+     "D2C028CB7AC14D0B": 24,
+     "DA0E7785727A0A65": 12
+    }
+   },
+   "version": "1.60.1.70707"
   }
  ],
  "counts": {
   "items": {
-   "added": 478,
-   "changed": 46,
-   "removed": 0,
-   "unchanged": 19211
+   "added": 0,
+   "changed": 567,
+   "discovered": 468,
+   "removed": 65,
+   "unchanged": 31373
   },
   "spells": {
-   "added": 59,
-   "changed": 144,
+   "added": 0,
+   "changed": 0,
+   "discovered": 0,
    "removed": 0,
-   "unchanged": 31828
+   "unchanged": 33379
   }
  },
  "hotfixPush": 113511,
  "product": "wowf",
  "scan": {
   "hotfixCacheSha256": "ebc2f037e07956d6394d9e27fb97831dde88fb6db5c3bc563e9da797801e8474",
-  "hotfixSummary": "build 70685 up to push 113511",
+  "hotfixSummary": "build 70707 up to push 113511, carried from build 70685",
+  "lockedByKey": {
+   "AreaTable": {
+    "0DA4670DB36FB2A9": 16,
+    "D2C028CB7AC14D0B": 29,
+    "DA0E7785727A0A65": 1
+   },
+   "Item": {
+    "D2C028CB7AC14D0B": 1,
+    "DA0E7785727A0A65": 53
+   },
+   "ItemEffect": {
+    "057DC814574BD5B6": 7,
+    "DA0E7785727A0A65": 25
+   },
+   "ItemSparse": {
+    "DA0E7785727A0A65": 63
+   },
+   "ItemXItemEffect": {
+    "D2C028CB7AC14D0B": 1,
+    "DA0E7785727A0A65": 32
+   },
+   "Map": {
+    "0DA4670DB36FB2A9": 2,
+    "D2C028CB7AC14D0B": 5,
+    "DA0E7785727A0A65": 1
+   },
+   "SkillLineAbility": {
+    "057DC814574BD5B6": 1
+   },
+   "Spell": {
+    "057DC814574BD5B6": 16,
+    "0DA4670DB36FB2A9": 278,
+    "D2C028CB7AC14D0B": 129,
+    "DA0E7785727A0A65": 53
+   },
+   "SpellAuraOptions": {
+    "057DC814574BD5B6": 1,
+    "0DA4670DB36FB2A9": 40,
+    "D2C028CB7AC14D0B": 17,
+    "DA0E7785727A0A65": 8
+   },
+   "SpellAuraRestrictions": {
+    "057DC814574BD5B6": 1,
+    "0DA4670DB36FB2A9": 5,
+    "D2C028CB7AC14D0B": 2,
+    "DA0E7785727A0A65": 9
+   },
+   "SpellCastingRequirements": {
+    "057DC814574BD5B6": 4,
+    "0DA4670DB36FB2A9": 7,
+    "D2C028CB7AC14D0B": 16,
+    "DA0E7785727A0A65": 17
+   },
+   "SpellCategories": {
+    "057DC814574BD5B6": 4,
+    "0DA4670DB36FB2A9": 219,
+    "D2C028CB7AC14D0B": 107,
+    "DA0E7785727A0A65": 18
+   },
+   "SpellClassOptions": {
+    "0DA4670DB36FB2A9": 5,
+    "D2C028CB7AC14D0B": 6
+   },
+   "SpellCooldowns": {
+    "057DC814574BD5B6": 5,
+    "0DA4670DB36FB2A9": 38,
+    "D2C028CB7AC14D0B": 21,
+    "DA0E7785727A0A65": 8
+   },
+   "SpellEffect": {
+    "057DC814574BD5B6": 62,
+    "0DA4670DB36FB2A9": 665,
+    "D2C028CB7AC14D0B": 382,
+    "DA0E7785727A0A65": 200
+   },
+   "SpellEquippedItems": {
+    "057DC814574BD5B6": 1,
+    "0DA4670DB36FB2A9": 7,
+    "D2C028CB7AC14D0B": 9
+   },
+   "SpellInterrupts": {
+    "057DC814574BD5B6": 8,
+    "0DA4670DB36FB2A9": 187,
+    "D2C028CB7AC14D0B": 94,
+    "DA0E7785727A0A65": 33
+   },
+   "SpellItemEnchantment": {
+    "057DC814574BD5B6": 1
+   },
+   "SpellLabel": {
+    "0DA4670DB36FB2A9": 18,
+    "D2C028CB7AC14D0B": 3,
+    "DA0E7785727A0A65": 23
+   },
+   "SpellLevels": {
+    "0DA4670DB36FB2A9": 93,
+    "D2C028CB7AC14D0B": 64,
+    "DA0E7785727A0A65": 2
+   },
+   "SpellMisc": {
+    "057DC814574BD5B6": 50,
+    "0DA4670DB36FB2A9": 509,
+    "D2C028CB7AC14D0B": 292,
+    "DA0E7785727A0A65": 102
+   },
+   "SpellName": {
+    "057DC814574BD5B6": 17,
+    "0DA4670DB36FB2A9": 293,
+    "D2C028CB7AC14D0B": 215,
+    "DA0E7785727A0A65": 84
+   },
+   "SpellPower": {
+    "0DA4670DB36FB2A9": 22,
+    "D2C028CB7AC14D0B": 24
+   },
+   "SpellReagents": {
+    "057DC814574BD5B6": 3,
+    "0DA4670DB36FB2A9": 2,
+    "D2C028CB7AC14D0B": 17,
+    "DA0E7785727A0A65": 16
+   },
+   "SpellShapeshift": {
+    "0DA4670DB36FB2A9": 2
+   },
+   "SpellTargetRestrictions": {
+    "057DC814574BD5B6": 4,
+    "0DA4670DB36FB2A9": 97,
+    "D2C028CB7AC14D0B": 24,
+    "DA0E7785727A0A65": 12
+   }
+  },
   "lockedRows": {
    "AreaTable": 46,
    "Item": 54,
@@ -171,25 +1463,25 @@
    "ItemXItemEffect": 33,
    "Map": 8,
    "SkillLineAbility": 1,
-   "Spell": 473,
+   "Spell": 476,
    "SpellAuraOptions": 66,
    "SpellAuraRestrictions": 17,
    "SpellCastingRequirements": 44,
-   "SpellCategories": 344,
-   "SpellClassOptions": 9,
-   "SpellCooldowns": 68,
-   "SpellEffect": 1301,
+   "SpellCategories": 348,
+   "SpellClassOptions": 11,
+   "SpellCooldowns": 72,
+   "SpellEffect": 1309,
    "SpellEquippedItems": 17,
-   "SpellInterrupts": 314,
+   "SpellInterrupts": 322,
    "SpellItemEnchantment": 1,
-   "SpellLabel": 36,
-   "SpellLevels": 154,
-   "SpellMisc": 945,
-   "SpellName": 606,
-   "SpellPower": 41,
+   "SpellLabel": 44,
+   "SpellLevels": 159,
+   "SpellMisc": 953,
+   "SpellName": 609,
+   "SpellPower": 46,
    "SpellReagents": 38,
-   "SpellShapeshift": 1,
-   "SpellTargetRestrictions": 138
+   "SpellShapeshift": 2,
+   "SpellTargetRestrictions": 137
   }
  },
  "schema": {
@@ -785,6 +2077,7 @@
   "SpellDuration": [
    "ID:INTEGER",
    "Duration:INTEGER",
+   "DurationPerLevel:INTEGER",
    "MaxDuration:INTEGER",
    "DurationPerResource:INTEGER"
   ],
@@ -1137,5 +2430,5 @@
   ]
  },
  "schemaVersion": 1,
- "version": "1.60.1.70685"
+ "version": "1.60.1.70707"
 }

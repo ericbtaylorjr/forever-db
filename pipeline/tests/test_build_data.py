@@ -49,9 +49,12 @@ def make_db(path, version="1.60.1.100", push=1, spells=None, items=None, extra_c
         row = dict(Display_lang=name or "Item", ItemLevel=ilvl or 1, InventoryType=inv or 0, ClassID=2, SubclassID=7, OverallQualityID=2,
                    StatModifier_bonusStat=[3, -1], StatPercentEditor=[0, 0], Flags=[0, 0, 0, 0, 0], ItemDelay=0, DmgVariance=0.0,
                    QualityModifier=0.0, RequiredLevel=1)
+        encrypted = isinstance(spec, dict) and spec.get("encrypted")   # an Item row but no ItemSparse row
         if isinstance(spec, dict):
-            row.update(spec)
+            row.update({k: v for k, v in spec.items() if k != "encrypted"})
         db.execute("insert into Item values (?, ?, ?, ?, 0)", (iid, row["ClassID"], row["SubclassID"], row["InventoryType"]))
+        if encrypted:
+            continue
         db.execute("insert into ItemSparse values (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                    (iid, row["Display_lang"], row["ItemLevel"], row["RequiredLevel"], row["InventoryType"], row["OverallQualityID"],
                     json.dumps(row["StatModifier_bonusStat"]), json.dumps(row["StatPercentEditor"]), json.dumps(row["Flags"]),
@@ -295,6 +298,65 @@ class IngestTest(unittest.TestCase):
         self.assertEqual(tags[9], ["marked-obsolete"])
         self.assertEqual(tags[10], ["pet"])
         self.assertEqual(tags[12], ["class-family:Hunter"])
+
+    def test_items_without_a_sparse_row_are_encrypted_placeholders(self):
+        self.ingest(self.db("a.db", version="1.60.1.100", items={
+            1: dict(ClassID=4, SubclassID=1, InventoryType=5, encrypted=True),          # Item row only
+            2: ("Revealed Sword", 10, 13)}))
+        items = self.current("items")
+        hidden = items[1]["data"]
+        self.assertEqual((hidden["discovery"], hidden["name"], hidden["isGear"], hidden["classId"]), ("encrypted", "", True, 4))
+        self.assertIsNone(items[1]["discoveredAt"])
+        self.assertEqual(items[2]["data"]["discovery"], "discovered")
+        self.assertEqual(items[2]["discoveredAt"], {"build": 100, "push": 1})
+
+    def test_item_named_only_by_other_tables_is_a_placeholder_too(self):
+        # id 5 has an equip effect but no Item or ItemSparse row at all
+        self.ingest(self.db("a.db", items={1: ("Base", 10, 13)}, effects={5: [100]}))
+        self.assertEqual(self.current("items")[5]["data"]["discovery"], "encrypted")
+
+    def test_discovering_an_item_is_its_own_event(self):
+        hidden = dict(ClassID=4, SubclassID=1, InventoryType=5, encrypted=True)
+        self.ingest(self.db("a.db", version="1.60.1.100", push=1, items={1: hidden, 2: hidden}))
+        self.ingest(self.db("b.db", version="1.60.1.100", push=2, items={
+            1: ("Gloves of Reveal", 10, 5), 2: hidden}))
+        item = self.current("items")[1]
+        self.assertEqual(item["data"]["discovery"], "discovered")
+        self.assertEqual(item["discoveredAt"], {"build": 100, "push": 2})
+        self.assertFalse(item["baseline"] and item["discoveredAt"] == item["firstSeen"])
+        event = self.history("items")[1]["events"][0]
+        self.assertEqual(event["type"], "discovered")
+        self.assertIn("discovery", event["areas"])
+        self.assertEqual(event["changes"]["discovery"], ["encrypted", "discovered"])
+        self.assertNotIn(2, self.history("items"))                       # still hidden: nothing happened
+        state = json.loads((build_data.DATA / "state.json").read_text())
+        self.assertEqual(state["builds"][-1]["counts"]["items"]["discovered"], 1)
+        self.assertEqual(state["builds"][-1]["discovery"]["items"], {"discovered": 1, "encrypted": 1})
+
+    def test_a_spell_known_only_from_a_skill_line_is_encrypted_until_named(self):
+        def with_skill_line(path, name):
+            db = self.db(path, version="1.60.1.100" if name is None else "1.60.1.200", spells={} if name is None else {7: (name, "x")})
+            con = sqlite3.connect(db)
+            con.executescript("""
+                create table SkillLine (ID INTEGER, CategoryID INTEGER, DisplayName_lang TEXT);
+                insert into SkillLine values (10, 7, 'Fire');
+                create table SkillLineAbility (ID INTEGER, SkillLine INTEGER, Spell INTEGER, ClassMask INTEGER);
+                insert into SkillLineAbility values (1, 10, 7, 128);""")
+            con.commit(); con.close()
+            return db
+        self.ingest(with_skill_line("a.db", None))
+        hidden = self.current("spells")[7]["data"]
+        self.assertEqual((hidden["discovery"], hidden["name"], hidden["computed"]["availability"]), ("encrypted", "", ["class:Mage"]))
+        self.ingest(with_skill_line("b.db", "Fireball"))
+        self.assertEqual(self.current("spells")[7]["data"]["discovery"], "discovered")
+        self.assertEqual(self.history("spells")[7]["events"][0]["type"], "discovered")
+
+    def test_locked_rows_are_recorded_per_key_for_each_build(self):
+        log = self.log("  Spell: 3 rows locked by TACT key AAAA\n  Spell: 2 rows locked by TACT key BBBB\n  Item: 1 rows locked by TACT key AAAA\n"
+                       "Hotfixes: build 100 up to push 1\n")
+        self.ingest(self.db("a.db", spells={1: ("A", "x")}), scan_log=log)
+        state = json.loads((build_data.DATA / "state.json").read_text())
+        self.assertEqual(state["builds"][-1]["locked"], {"Spell": {"AAAA": 3, "BBBB": 2}, "Item": {"AAAA": 1}})
 
     def test_default_values_are_omitted(self):
         self.ingest(self.db("a.db", spells={1: ("A", "x")}))

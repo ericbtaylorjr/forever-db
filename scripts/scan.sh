@@ -63,3 +63,6 @@ echo "db2tool @ $(git -C "$FOREVER_REPO" rev-parse --short HEAD) mode=$MODE" | t
 # shellcheck disable=SC2086
 python3 -I "$HERE/pipeline/build_data.py" ingest --db "$DB" --scan-log "$LOG" \
   --summary-file "$WORK/summary.md" "${INGEST[@]}" ${INGEST_ARGS:-}
+
+# Icon file names for the site live in a side file (records stay a pure function of the scan); refresh it with the listfile db2tool just used.
+python3 -I "$HERE/pipeline/icon_names.py" "$FOREVER_REPO/tools/db2tool/listfile.csv"

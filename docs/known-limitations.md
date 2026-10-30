@@ -11,6 +11,12 @@ Keep this current. Add an entry whenever you discover a data quirk.
 - **Intermediate builds are folded together if a scan is missed.** The check compares with the latest state, so a skipped build is not ingested separately (history cannot be inserted out of order). The 3-hourly schedule makes this rare.
 - Ingests are keyed by `(build, push)`. The local client's `DBCache.bin` can lag (it was at push 113441 when Raidbots had 113511); never commit a local-install scan over a CDN one.
 
+## Discovery and encrypted content
+
+- **Interpretation, not confirmation.** "Encrypted" = an item with an `Item` row but no `ItemSparse` row, or a spell named only by other tables. The pattern (468 items revealed by one hotfix push; 1,076 class spells known only from skill lines) matches the game's design, but it has not been checked in the live game. See `docs/discovery.md`.
+- **TACT-locked rows have no ids.** 4,908 rows (build 70707) behind unknown keys can only be counted, per table and key. They are not entities until a key opens them.
+- Why an entity is hidden (never found / not released / removed) is not visible in the files.
+
 ## Coverage
 
 - **Locked rows.** Encrypted sections with unknown TACT keys are skipped (4,850 rows at push 113511, mostly `SpellEffect` 1,301, `SpellMisc` 945, `SpellName` 606, `Spell` 473; recorded in `state.json` → `scan.lockedRows`). Those spells/items may be missing or partial, and appear later as `added` once a key is published. Only the latest ingest's counts are kept in `scan`.

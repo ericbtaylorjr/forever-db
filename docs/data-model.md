@@ -11,6 +11,7 @@ Output contract of `pipeline/build_data.py`. The future browser UI should depend
 | `data/history/spells.jsonl`, `data/history/items.jsonl` | One line per entity that has had at least one event since the baseline |
 | `data/state.json` | Ingest state (see below) |
 | `data/stat-names.json` | ITEM_MOD id → display name, for `computed.stats` |
+| `data/icon-names.json` | icon FileDataID → icon file name (`inv_sword_01`), written by `pipeline/icon_names.py` from the community listfile |
 
 All JSONL is sorted by `id`, keys sorted, compact.
 
@@ -29,6 +30,10 @@ All JSONL is sorted by `id`, keys sorted, compact.
 ```
 
 **Versions.** A version is `{build, push}`. `push` is the server's hotfix push number; **`push: 0` is a build's base data with no hotfix overlay** (all historical builds). `(build, push)` orders versions. History starts at build 70245, so `lastChanged` is exact only after that; for entities with `baseline: true` and `lastChanged` equal to `firstSeen`, read it as "in or before 70245". See `known-limitations.md` for what history exists and what is missing.
+
+## Discovery (both kinds)
+
+Every `data` has `discovery`: `"discovered"` (the game files give its name and details) or `"encrypted"` (known to exist, details hidden; see `docs/discovery.md`). Each entity also has `discoveredAt` (`{build, push}`, `null` while encrypted). Encrypted records are filled only with what the files expose: items keep class, subclass, slot, icon, set, effects; spells keep `computed.availability`. History gets a `discovered` event when an entity goes from encrypted to discovered.
 
 ## `data` for spells
 
@@ -102,7 +107,8 @@ An item exists in the dataset iff it has an `ItemSparse` row. `Item` has ~12k mo
   {"build": 70700, "push": 113500, "type": "changed", "areas": ["related"],
    "changes": {"description": ["old", "new"], "related.SpellEffect[1].EffectBasePointsF": [162.0, 99.0]}},
   {"build": 70700, "push": 113500, "type": "removed"},
-  {"build": 70701, "push": 113510, "type": "added"}   // appeared after the baseline
+  {"build": 70701, "push": 113510, "type": "added", "discovery": "encrypted"},   // appeared after the baseline
+  {"build": 70707, "push": 113511, "type": "discovered", "areas": ["discovery", "name", ...], "changes": {"discovery": ["encrypted", "discovered"], ...}}
 ]}
 ```
 
@@ -110,4 +116,4 @@ An item exists in the dataset iff it has an `ItemSparse` row. `Item` has ~12k mo
 
 ## `state.json`
 
-`version`, `build`, `hotfixPush` (latest ingested); `baselineBuild`/`baselinePush`; `schema` (column list per table, used for the schema-change guard); `scan` (latest ingest only: `hotfixSummary`, `lockedRows` per table, `hotfixCacheSha256` of the Raidbots cache, which `builds.py check` compares against); `builds` (one entry per ingest: version, push, add/change/remove counts, hotfix summary; the ledger of what was ingested and the basis for the sanity check in AGENTS.md).
+`version`, `build`, `hotfixPush` (latest ingested); `baselineBuild`/`baselinePush`; `schema` (column list per table, used for the schema-change guard); `scan` (latest ingest only: `hotfixSummary`, `lockedRows` per table, `hotfixCacheSha256` of the Raidbots cache, which `builds.py check` compares against); `builds` (one entry per ingest: version, push, add/change/remove/discovered counts, `discovery` totals (discovered/encrypted per kind), `locked` (rows no key opens, per table and key), hotfix summary; the ledger of what was ingested and the basis for the sanity check in AGENTS.md).

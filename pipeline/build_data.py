@@ -210,10 +210,14 @@ def build_spells(src):
 
     availability = spell_availability(src)
     renderer = tooltips.Renderer(tooltips.Facts(src))
+    children = set().union(*(idx.keys() for idx in related.values())) if related else set()
+    # Known to exist = a Spell/SpellName row, a row in any per-spell table, or any table naming the id (a class skill
+    # line, an item effect, a talent, a trigger...). A spell with no name is hidden by the game: "encrypted".
     out = {}
-    for sid in sorted(set(spell) | set(name)):
+    for sid in sorted(set(spell) | set(name) | set(availability) | children):
         s, n = spell.get(sid, {}), name.get(sid, {})
         rec = {
+            "discovery": "discovered" if n.get("Name_lang") else "encrypted",
             "name": n.get("Name_lang", ""),
             "subtext": s.get("NameSubtext_lang", ""),
             "description": s.get("Description_lang", ""),
@@ -225,7 +229,10 @@ def build_spells(src):
             rec["iconFileDataID"] = m.get("SpellIconFileDataID", 0)
             rec["schoolMask"] = m.get("SchoolMask", 0)
             rec["castTimeMs"] = cast.get(m.get("CastingTimeIndex"), {}).get("Base")
-            rec["durationMs"] = dur.get(m.get("DurationIndex"), {}).get("Duration")
+            duration = dur.get(m.get("DurationIndex"), {})
+            rec["durationMs"] = duration.get("Duration")
+            if duration.get("DurationPerLevel"):   # column new in build 70707: the real duration grows with level
+                rec["durationPerLevelMs"] = duration["DurationPerLevel"]
             r = rng.get(m.get("RangeIndex"), {})
             rec["range"] = {"name": r.get("DisplayName_lang"), "min": r.get("RangeMin"), "max": r.get("RangeMax")} if r else None
         rec["related"] = {t: child_rows(idx[sid], "SpellID", "Spell") for t, idx in related.items() if sid in idx}
@@ -379,12 +386,24 @@ def build_items(src, gametables):
     sets = {r["ID"]: r for r in src.rows("ItemSet")}
     tables = StatTables(src, gametables)
 
+    sparse_rows = {r["ID"]: r for r in src.rows("ItemSparse")}
+    set_of = {}   # item id -> the ItemSet that lists it, so an undiscovered item still shows its set
+    for r in sets.values():
+        for member in r.get("ItemID") or []:
+            if member:
+                set_of.setdefault(member, r)
+    referenced = set(item_effects) | set(bonus_trees) | set(set_of)
+    # Known to exist = an Item row, a Sparse row, or any other table naming the id. Without a Sparse row the
+    # item's name and stats are hidden by the game: "encrypted" until the server reveals it (see docs/discovery.md).
     out = {}
-    for sp in src.rows("ItemSparse"):
-        iid = sp["ID"]
+    for iid in sorted(set(item) | set(sparse_rows) | referenced):
+        sp = sparse_rows.get(iid, {})
+        discovered = iid in sparse_rows
         base = item.get(iid, {})
-        cls, sub, inv = base.get("ClassID"), base.get("SubclassID"), sp.get("InventoryType", 0)
+        cls, sub = base.get("ClassID"), base.get("SubclassID")
+        inv = sp.get("InventoryType", 0) if discovered else base.get("InventoryType", 0)
         rec = {
+            "discovery": "discovered" if discovered else "encrypted",
             "name": sp.get("Display_lang", ""),
             "description": sp.get("Description_lang", ""),
             "classId": cls,
@@ -404,7 +423,7 @@ def build_items(src, gametables):
             "sparse": strip(sp, "ID", "Display_lang", "Description_lang", "ItemLevel", "RequiredLevel",
                             "InventoryType", "OverallQualityID", "ItemNameDescriptionID"),
             "item": strip(base, "ID", "ClassID", "SubclassID", "InventoryType", "IconFileDataID"),
-            "computed": compute_item(sp, cls, sub, tables),
+            "computed": compute_item(sp, cls, sub, tables) if discovered else {},
             "effects": [],
             "bonusTrees": sorted(r["ItemBonusTreeID"] for r in bonus_trees.get(iid, [])),
         }
@@ -412,7 +431,7 @@ def build_items(src, gametables):
         linked = [effects[link["ItemEffectID"]] for link in item_effects.get(iid, []) if link["ItemEffectID"] in effects]
         linked.sort(key=lambda e: (e.get("LegacySlotIndex", 0), e.get("SpellID", 0), e.get("TriggerType", 0)))
         rec["effects"] = [strip(e, "ID") for e in linked]
-        s = sets.get(sp.get("ItemSet"))
+        s = sets.get(sp.get("ItemSet")) or set_of.get(iid)
         if s:
             rec["itemSet"] = {"id": s["ID"], "name": s["Name_lang"]}
         out[iid] = rec
@@ -463,13 +482,15 @@ def write_jsonl(path, records):
 
 def parse_scan_log(path):
     """Pull the build, hotfix push and locked-row counts out of db2tool's stdout."""
-    info = {"lockedRows": {}}
+    info = {"lockedRows": {}, "lockedByKey": {}}
     if not path:
         return info
     for line in Path(path).read_text().splitlines():
         m = re.match(r"\s*(\w+): (\d+) rows locked by TACT key (\w+)", line)
         if m:
             info["lockedRows"][m.group(1)] = info["lockedRows"].get(m.group(1), 0) + int(m.group(2))
+            by_key = info["lockedByKey"].setdefault(m.group(1), {})
+            by_key[m.group(3)] = by_key.get(m.group(3), 0) + int(m.group(2))
         m = re.match(r"Hotfixes: (.*)", line)
         if m:
             info["hotfixSummary"] = m.group(1)
@@ -486,24 +507,31 @@ def ingest_entities(kind, new, build, push, baseline):
     Returns (current, history, stats)."""
     current = read_jsonl(DATA / f"{kind}.jsonl")
     history = read_jsonl(DATA / "history" / f"{kind}.jsonl")
-    stats = {"added": 0, "changed": 0, "removed": 0, "unchanged": 0}
-    event_base = {"build": build, "push": push}
+    stats = {"added": 0, "changed": 0, "removed": 0, "unchanged": 0, "discovered": 0}
+    version = {"build": build, "push": push}
+
+    def log(eid, event):
+        history.setdefault(eid, {"id": eid, "events": []})["events"].append({**version, **event})
 
     for eid, data in new.items():
         h = digest(data)
         old = current.get(eid)
+        discovered = data["discovery"] == "discovered"
         if old is None or old.get("removed"):
             stats["added"] += 1
-            entry = {"id": eid, "firstSeen": {"build": build, "push": push}, "lastChanged": {"build": build, "push": push},
-                     "baseline": baseline, "hash": h, "data": data}
+            entry = {"id": eid, "firstSeen": version, "lastChanged": version, "baseline": baseline, "hash": h, "data": data,
+                     "discoveredAt": version if discovered else None}
             if not baseline:  # baseline entities carry firstSeen/baseline instead of an event
-                history.setdefault(eid, {"id": eid, "events": []})["events"].append({**event_base, "type": "added"})
+                log(eid, {"type": "added", "discovery": data["discovery"]})
         elif old["hash"] != h:
             changes = diff(old["data"], data)
-            ev = {**event_base, "type": "changed", "areas": areas(changes), "changes": changes}
+            was_discovered = old["data"].get("discovery") == "discovered"
+            newly = discovered and not was_discovered
+            log(eid, {"type": "discovered" if newly else "changed", "areas": areas(changes), "changes": changes})
             stats["changed"] += 1
-            entry = {**old, "lastChanged": {"build": build, "push": push}, "hash": h, "data": data}
-            history.setdefault(eid, {"id": eid, "events": []})["events"].append(ev)
+            stats["discovered"] += newly
+            entry = {**old, "lastChanged": version, "hash": h, "data": data,
+                     "discoveredAt": version if newly else (old.get("discoveredAt") if discovered else None)}
         else:
             stats["unchanged"] += 1
             entry = old
@@ -512,8 +540,8 @@ def ingest_entities(kind, new, build, push, baseline):
     for eid, old in list(current.items()):
         if eid not in new and not old.get("removed"):
             stats["removed"] += 1
-            current[eid] = {**old, "removed": True, "lastChanged": {"build": build, "push": push}}
-            history.setdefault(eid, {"id": eid, "events": []})["events"].append({**event_base, "type": "removed"})
+            current[eid] = {**old, "removed": True, "lastChanged": version}
+            log(eid, {"type": "removed"})
     return current, history, stats
 
 
@@ -545,10 +573,12 @@ def cmd_ingest(args):
                      + ", ".join(changed_tables) + "\nReview docs/update-runbook.md (\"Schema changes\"), then re-run with --allow-schema-change.")
 
     baseline = state is None
-    results = {}
+    results, totals = {}, {}
     for kind, build_records in (("spells", lambda: build_spells(src)), ("items", lambda: build_items(src, args.gametables))):
         current, history, stats = ingest_entities(kind, build_records(), build, push, baseline)
         results[kind] = stats
+        live = [e["data"]["discovery"] for e in current.values() if not e.get("removed")]
+        totals[kind] = {"discovered": live.count("discovered"), "encrypted": live.count("encrypted")}
         if not args.dry_run:
             write_jsonl(DATA / f"{kind}.jsonl", current)
             write_jsonl(DATA / "history" / f"{kind}.jsonl", history)
@@ -561,7 +591,10 @@ def cmd_ingest(args):
     }
     builds = (state or {}).get("builds", [])
     builds.append({"version": version, "build": build, "hotfixPush": push, "counts": results,
-                   "hotfixes": scan.get("hotfixSummary", "unknown")})
+                   "hotfixes": scan.get("hotfixSummary", "unknown"),
+                   # Encrypted rows no key opens yet, per table and key. The rows have no readable id, so this is
+                   # the only trace of them until a key arrives; a key that disappears here has been unlocked.
+                   "locked": scan.get("lockedByKey", {}), "discovery": totals})
     new_state["builds"] = builds
     reasons = [] if baseline else suspicious(results, state["counts"])
     summary = {"version": version, "push": push, "baseline": baseline, "suspicious": reasons, **results}
@@ -589,10 +622,10 @@ def suspicious(results, previous):
 def render_summary(summary, scan):
     lines = [f"## Forever {summary['version']} (hotfix push {summary['push']})", "",
              f"Hotfixes: {scan.get('hotfixSummary', 'unknown')}", "",
-             "| | added | changed | removed | unchanged |", "|---|---|---|---|---|"]
+             "| | added | changed | removed | unchanged | newly discovered |", "|---|---|---|---|---|---|"]
     for kind in ("spells", "items"):
         st = summary[kind]
-        lines.append(f"| {kind} | {st['added']} | {st['changed']} | {st['removed']} | {st['unchanged']} |")
+        lines.append(f"| {kind} | {st['added']} | {st['changed']} | {st['removed']} | {st['unchanged']} | {st['discovered']} |")
     if scan.get("lockedRows"):
         lines += ["", "Rows hidden behind unknown TACT keys: "
                   + ", ".join(f"{t} {n}" for t, n in sorted(scan["lockedRows"].items()))]

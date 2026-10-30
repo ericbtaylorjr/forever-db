@@ -96,6 +96,7 @@ class Spell:
     def __init__(self, sid):
         self.id, self.name, self.description, self.aura_description = sid, "", "", ""
         self.duration_ms, self.school_mask, self.base_level, self.max_level = 0, 0, 0, 0
+        self.duration_scales = False   # SpellDuration.DurationPerLevel (build 70707+): the real duration depends on level
         self.proc_chance = 0
         self.effects = {}
         self.radii = {}
@@ -107,7 +108,7 @@ class Facts:
     def __init__(self, src):
         self.spells = {}
         radius = {r["ID"]: r.get("RadiusMax", 0.0) for r in src.rows("SpellRadius")}
-        durations = {r["ID"]: r.get("Duration", 0) for r in src.rows("SpellDuration")}
+        durations = {r["ID"]: r for r in src.rows("SpellDuration")}
         for r in src.rows("Spell"):
             s = self.get(r["ID"])
             s.description, s.aura_description = r.get("Description_lang", ""), r.get("AuraDescription_lang", "")
@@ -115,7 +116,9 @@ class Facts:
             self.get(r["ID"]).name = r.get("Name_lang", "")
         for r in sorted(src.rows("SpellMisc"), key=lambda r: -r.get("DifficultyID", 0)):  # lowest difficulty wins
             s = self.get(r["SpellID"])
-            s.duration_ms = durations.get(r.get("DurationIndex", 0), 0) if r.get("DurationIndex") else 0
+            duration = durations.get(r.get("DurationIndex", 0), {}) if r.get("DurationIndex") else {}
+            s.duration_ms = duration.get("Duration", 0)
+            s.duration_scales = bool(duration.get("DurationPerLevel", 0))
             s.school_mask = r.get("SchoolMask", 0)
         for r in src.rows("SpellLevels"):
             if r.get("DifficultyID", 0) == 0:
@@ -181,11 +184,11 @@ class Renderer:
             return effect().spread()[1]
         if letter == "o" and index:
             e = effect()
-            if e.period_ms <= 0 or spell.duration_ms <= 0 or spell.duration_ms % e.period_ms:
+            if e.period_ms <= 0 or spell.duration_ms <= 0 or spell.duration_scales or spell.duration_ms % e.period_ms:
                 raise Unresolved(token)
             return e.average(token) * (spell.duration_ms // e.period_ms)
         if letter == "d" and not index:
-            if spell.duration_ms <= 0:
+            if spell.duration_ms <= 0 or spell.duration_scales:
                 raise Unresolved(token)
             return spell.duration_ms / 1000
         if letter == "t" and index:
@@ -344,7 +347,7 @@ class Renderer:
                 token = m.group(0)
                 if m.group(2) == "d" and not m.group(3):
                     other = self.facts.spells.get(int(m.group(1))) if m.group(1) else spell
-                    if other is None:
+                    if other is None or other.duration_scales:
                         raise Unresolved(token)
                     out.append(format_duration(other.duration_ms, token))
                     last = other.duration_ms / 1000

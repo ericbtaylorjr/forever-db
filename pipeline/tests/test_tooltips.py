@@ -20,6 +20,7 @@ def world(*spells):
         s.duration_ms, s.proc_chance = kw.get("duration_ms", 0), kw.get("proc", 0)
         s.base_level, s.max_level, s.school_mask = kw.get("base_level", 0), kw.get("max_level", 0), kw.get("school", 4)
         s.radii = kw.get("radii", {})
+        s.duration_scales = kw.get("duration_scales", False)
         for i, row in enumerate(kw.get("effects", [])):
             s.effects[i] = tooltips.Effect(row, s)
     return tooltips.Renderer(facts), facts
@@ -85,6 +86,12 @@ class RenderTest(unittest.TestCase):
             self.ok("$d", text, duration_ms=ms)
         self.blocked("$d", "$d", duration_ms=0)               # no duration: the client's wording is not known
         self.blocked("$d", "$d", duration_ms=90000)           # 1.5 min: format not confirmed
+
+    def test_duration_that_scales_with_level_is_refused(self):
+        # SpellDuration.DurationPerLevel (new in build 70707): the base duration alone would be wrong at level 60.
+        self.blocked("$d", "$d", duration_ms=10000, duration_scales=True)
+        row = {"Effect": 6, "EffectAura": 3, "EffectBasePointsF": 5.0, "EffectAuraPeriod": 1000}
+        self.blocked("$o1", "$o1", duration_ms=10000, duration_scales=True, effects=[row])
 
     def test_periodic_total_needs_a_whole_number_of_ticks(self):
         row = {"Effect": 6, "EffectAura": 3, "EffectBasePointsF": 36.0, "EffectAuraPeriod": 3000}
