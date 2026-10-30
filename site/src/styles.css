@@ -1,0 +1,128 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens live in CSS variables so light/dark and any later restyle (for example to match the Rogue Handbook)
+ * change in one place. `@theme inline` maps them into Tailwind's colour namespace: bg-panel, text-mute, border-line...
+ */
+:root {
+  color-scheme: dark;
+  --bg: #121212;
+  --panel: #1a1a1a;
+  --panel-2: #222222;
+  --line: #333333;
+  --text: #ececec;
+  --mute: #9a9a9a;
+  --accent: #d4af4f;
+  --accent-ink: #151515;
+  --link: #8cb4ff;
+  --good: #5fbf6a;
+  --warn: #e6a23c;
+  --bad: #e5604f;
+  --enc: #b07cff;
+  --enc-bg: #2a2038;
+  --q0: #9d9d9d;
+  --q1: #ffffff;
+  --q2: #1eff00;
+  --q3: #3d9bff;
+  --q4: #b565f2;
+  --q5: #ff8000;
+  --q6: #e6cc80;
+  --q7: #00ccff;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg: #f6f4ef;
+    --panel: #ffffff;
+    --panel-2: #efece4;
+    --line: #d9d4c7;
+    --text: #1d1b16;
+    --mute: #6b665a;
+    --accent: #7a5c0f;
+    --accent-ink: #ffffff;
+    --link: #1a55b8;
+    --good: #1e7a2b;
+    --warn: #99600b;
+    --bad: #b3341f;
+    --enc: #6b3fc2;
+    --enc-bg: #efe8fb;
+    --q0: #6e6e6e;
+    --q1: #3d3d3d;
+    --q2: #167a00;
+    --q3: #0058b0;
+    --q4: #8426c9;
+    --q5: #a85000;
+    --q6: #84670d;
+    --q7: #00759a;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel2: var(--panel-2);
+  --color-line: var(--line);
+  --color-ink: var(--text);
+  --color-mute: var(--mute);
+  --color-accent: var(--accent);
+  --color-accentink: var(--accent-ink);
+  --color-link: var(--link);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-enc: var(--enc);
+  --color-encbg: var(--enc-bg);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+}
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Encrypted entries read as locked: muted, with a violet accent. */
+.enc-row {
+  background: linear-gradient(90deg, var(--enc-bg), transparent 60%);
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--panel-2), var(--line), var(--panel-2));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

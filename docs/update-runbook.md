@@ -50,7 +50,7 @@ If you change the stat rules, run the unit tests (the golden set must still pass
 
 ## Checking the models against wowsims
 
-After changing `pipeline/tooltips.py` (effect amounts, ranges) or the item rules: run `python3 pipeline/tests/check_against_gamedata.py .scan/scan.db <gamedata checkout>/spells` (tooltips; expect 1,959/1,961 amounts and 748/748 ranges) and the item comparison in `docs/item-stats-spike.md`, plus `python3 -m unittest discover -s pipeline/tests`. `docs/verification-checklist.md` is the list to compare in game.
+After changing `pipeline/tooltips.py` (effect amounts, ranges) or the item rules: run `python3 pipeline/tests/check_against_gamedata.py .scan/scan.db <gamedata checkout>/spells` (tooltips; expect 1,959/1,961 amounts and 748/748 ranges) and the item comparison in `docs/item-stats-spike.md`, plus `python3 -m unittest discover -s pipeline/tests`. `docs/verification-checklist.md` is the list to compare in game. After any change to how history is written or to `build_data.py`, run `python3 pipeline/tests/check_history_roundtrip.py` (needs the scans from `scripts/backfill.sh`): it rebuilds every entity as it was in every past version from the history and compares it with the real scan. On 2026-10-30 it reported 0 mismatches for all 32,009 items and 33,388 spells at all 7 earlier versions.
 
 ## Verifying an ingest
 

@@ -1,4 +1,4 @@
-# Keeps the pinned GitHub Actions current (they are pinned by commit SHA). See docs/update-runbook.md "Dependencies".
+# Keeps the pinned GitHub Actions and the website's npm packages current (both are pinned exactly). See docs/update-runbook.md "Dependencies".
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -7,3 +7,10 @@ updates:
       interval: weekly
     commit-message:
       prefix: "ci"
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 5

@@ -1,8 +1,8 @@
 # forever-db
 
-A versioned dataset of every spell, item and piece of gear in WoW Forever, built from the game files, with the build/hotfix each entry last changed in. A searchable browser with build-to-build diffs will sit on top (planned; hosted on GitHub Pages).
+A versioned dataset of every spell, item and piece of gear in WoW Forever, built from the game files, with the build/hotfix each entry last changed in. A static website (`site/`) browses it: filters, history, side-by-side version compare, per-build change pages, and clear marking of content the game has not revealed yet ("encrypted").
 
-Start with [AGENTS.md](AGENTS.md). Details: [data model](docs/data-model.md) · [update runbook](docs/update-runbook.md) · [known limitations](docs/known-limitations.md).
+Start with [AGENTS.md](AGENTS.md). Details: [website](site/README.md) · [discovery](docs/discovery.md) · [data model](docs/data-model.md) · [update runbook](docs/update-runbook.md) · [known limitations](docs/known-limitations.md).
 
 ```sh
 FOREVER_REPO=~/dev/forever scripts/scan.sh --cdn    # scan the live build and update data/

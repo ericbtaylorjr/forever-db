@@ -22,8 +22,9 @@ Dataset (and, later, browser) of every spell, item and piece of gear in WoW **Fo
 | `scan/forever-ref.txt`, `scan/patches/` | Pinned wowsims/forever commit, and our small patch to db2tool (historical-build pinning). |
 | `scripts/scan.sh` | End to end: run `db2tool` → ingest. Modes: local install, `--cdn` (live), `--pin` (historical). |
 | `scripts/backfill.sh` | Destructive: rebuild `data/` from historical builds + live. |
-| `.github/workflows/` | `test.yml` (unit tests), `update-data.yml` (scheduled scan → PR). |
-| `docs/` | Data model, update runbook, known limitations. |
+| `.github/workflows/` | `test.yml` (pipeline tests), `update-data.yml` (scheduled scan → PR), `site.yml` (build/test the site; deploys to Pages only when `PAGES_ENABLED=true`). |
+| `site/` | The website (React 19 + Vite 8 + Tailwind 4, static, GitHub Pages). See `site/README.md`. |
+| `docs/` | Data model, discovery, site data, tooltips, update runbook, known limitations, verification checklist. |
 
 Extraction itself is done by `tools/db2tool` from [wowsims/forever](https://github.com/wowsims/forever) (MIT). We do not vendor it; `FOREVER_REPO` points at a checkout.
 
@@ -36,6 +37,9 @@ FOREVER_REPO=~/dev/forever scripts/scan.sh --cdn        # scan the live build (C
 FOREVER_REPO=~/dev/forever scripts/scan.sh              # scan the local install instead (its hotfix cache lags)
 FOREVER_REPO=~/dev/forever scripts/backfill.sh          # DELETES data/, rebuilds history
 python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would change
+python3 pipeline/site_data.py                           # data/ -> site/public/data (git-ignored); then `npm run dev` in site/
+(cd site && npm run typecheck && npm test)             # website checks
+python3 pipeline/tests/check_history_roundtrip.py       # after changing the history format or build_data: rebuild every past version from history and compare with the real scans
 ```
 
 ## Rules that keep the data trustworthy
@@ -53,7 +57,8 @@ python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would cha
 11. **Item stats are derived, equip-effect stats are not merged.** `computed` comes from the budget tables; effects stay in `effects`. If you change the formula, the golden test must still pass and `data/` must be rebuilt (`scripts/backfill.sh`). Read `docs/item-stats-spike.md` first.
 12. **Encrypted is explicit.** Every item/spell has `discovery`; hidden ones are placeholders, never dropped or guessed (`docs/discovery.md`). A new `discovered` history event means the game revealed it.
 13. **Rendered text never contains a guessed number.** `pipeline/tooltips.py` renders a template only if every token is exact; otherwise the text is `null`. Do not "fix" a refusal by guessing; add an exact rule with a test and the gamedata check (`docs/tooltips.md`).
-14. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
+14. **The website reads `data/` only through `pipeline/site_data.py`** (`docs/site-data.md`). A change to the record or history format must update `site_data.py`, `site/src/lib/data.ts` and `site/src/lib/history.ts` together, with `check_history_roundtrip.py` green. Publishing is opt-in (`PAGES_ENABLED`); never enable it on the owner's behalf.
+15. Update `docs/known-limitations.md` whenever you find a data quirk. Keep docs in step with code in the same commit.
 
 ## Conventions
 
@@ -65,7 +70,7 @@ python3 pipeline/build_data.py ingest --db X --dry-run  # preview what would cha
 
 ## Project status (keep current)
 
-- Done: extraction via db2tool, normalized spells/items, field-level history, history for builds 70245 → 70685 (+ hotfix push 113511), update check, scheduled workflow (written, not yet run on GitHub).
-- Done: spell tooltips rendered (83.3 % of templated texts, rest refused), spell `availability` tags, in-game checklist (`docs/verification-checklist.md`, not yet run by a person).
-- Done: item stats computed in the pipeline (`computed`, validated against wowsims' output: 5,200/5,225 items, 801/801 weapons), history events carry `areas`, effects ordered by game slot.
-- Next: confirm the first real auto-update PR (the pushed workflow predates the stats change, push first); run the in-game checklist; the browser UI (GitHub Pages). Open questions live in `docs/known-limitations.md`.
+- Data: extraction, items/spells, history for builds 70245 → 70707 (+ hotfix push 113511), computed item stats (validated against wowsims' output), rendered spell text (83 % of templated texts, rest refused), spell availability tags, **encrypted/discovered tracking** (`docs/discovery.md`), automated updates (workflow written; first real update PR not yet seen).
+- Website v1 built (`site/`): Items and Spells browsers with filters, detail pages with history and compare, Builds list, Build page with change filters and locked-key reporting. Not yet published (see `site/README.md` > Publishing).
+- Not yet done: in-game verification of stats and spell text (`docs/verification-checklist.md`; the game is not live), the first real auto-update PR, item sources (where things drop), localization.
+- Open questions live in `docs/known-limitations.md`.

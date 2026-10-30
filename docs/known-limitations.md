@@ -17,6 +17,14 @@ Keep this current. Add an entry whenever you discover a data quirk.
 - **TACT-locked rows have no ids.** 4,908 rows (build 70707) behind unknown keys can only be counted, per table and key. They are not entities until a key opens them.
 - Why an entity is hidden (never found / not released / removed) is not visible in the files.
 
+## Website
+
+- Icons are hot-linked from a public icon host, so they depend on it being up and on it having the icon (a placeholder shows otherwise). `site/src/config.ts` has the single function to change if we self-host.
+- Removed items and spells are not in the browsable lists; a build page names them from its own file. Build-page filters use an entity's *current* attributes, not its attributes at that build.
+- The compare view is field-level (old value, new value). It does not draw two game-style tooltips side by side.
+- Not tested in a live browser on iOS or Firefox; layout was checked at desktop and 390 px widths in Chrome. Dark mode colors were checked for contrast (WCAG AA) but not viewed.
+- The "test item" filter is a name-pattern guess (`TEST_NAME` in `pipeline/site_data.py`), off by default.
+
 ## Coverage
 
 - **Locked rows.** Encrypted sections with unknown TACT keys are skipped (4,850 rows at push 113511, mostly `SpellEffect` 1,301, `SpellMisc` 945, `SpellName` 606, `Spell` 473; recorded in `state.json` → `scan.lockedRows`). Those spells/items may be missing or partial, and appear later as `added` once a key is published. Only the latest ingest's counts are kept in `scan`.

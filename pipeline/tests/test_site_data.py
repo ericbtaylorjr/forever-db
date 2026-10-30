@@ -59,6 +59,30 @@ class SiteDataTest(unittest.TestCase):
         self.assertEqual(first["changes"], [])                      # the baseline has no events
         self.assertEqual(first["locked"], {"Spell": {"AAAA": 3}})
 
+    def test_a_removed_entity_keeps_its_last_name_in_the_build_file(self):
+        self.ingest(self.db("a.db", version="1.60.1.100", items={1: ("Gone Sword", 10, 13), 2: ("Stays", 10, 13)}))
+        self.ingest(self.db("b.db", version="1.60.1.200", items={2: ("Stays", 10, 13)}))
+        site_data.build(self.out)
+        removed = [c for c in json.loads((self.out / "builds" / "1.json").read_text())["changes"] if c["t"] == "removed"]
+        self.assertEqual([(c["k"], c["id"], c["nm"]) for c in removed], [("i", 1, "Gone Sword")])
+        index = json.loads((self.out / "items.json").read_text())
+        self.assertEqual([r[0] for r in index["rows"]], [2])           # ...but is not in the browsable list
+
+    def test_test_and_placeholder_names_are_flagged_not_dropped(self):
+        self.ingest(self.db("a.db", items={1: ("Sword of Truth", 10, 13), 2: ("1500 Test sword 80 purple", 10, 13), 3: ("OLD Axe", 10, 13)}))
+        site_data.build(self.out)
+        index = json.loads((self.out / "items.json").read_text())
+        flags = {r[0]: r[index["cols"].index("test")] for r in index["rows"]}
+        self.assertEqual(flags, {1: 0, 2: 1, 3: 1})
+
+    def test_derived_areas_are_not_listed(self):
+        self.ingest(self.db("a.db", version="1.60.1.100", items={1: dict(ClassID=2, SubclassID=7, InventoryType=13, OverallQualityID=1)}))
+        self.ingest(self.db("b.db", version="1.60.1.200", items={1: dict(ClassID=2, SubclassID=7, InventoryType=13, OverallQualityID=3)}))
+        site_data.build(self.out)
+        change = json.loads((self.out / "builds" / "1.json").read_text())["changes"][0]
+        self.assertIn("quality", change["a"])
+        self.assertNotIn("qualityName", change["a"])
+
     def test_a_key_that_disappears_is_reported_as_unlocked(self):
         self.build_two_versions()
         meta = json.loads((self.out / "meta.json").read_text())

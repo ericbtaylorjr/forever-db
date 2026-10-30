@@ -19,6 +19,7 @@ Stdlib only.
 import argparse
 import json
 import os
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -29,10 +30,15 @@ SHARD_SIZE = 250
 MAX_CHANGES_PER_ENTRY = 8       # build pages show a short summary; the entity page has the full history
 MAX_VALUE_CHARS = 160
 MAX_USED_BY = 200
+# Names that mark an item as a test or placeholder ("1500 Test sword", "90 Epic Frost Belt", "... DEPRECATED"): a heuristic for
+# the site's "hide test items" filter, never used to drop anything.
+TEST_NAME = re.compile(r"\btest\b|deprecated|\(old\)|^old\b|^zz|\bqa\b|\[dnt\]|^\d+ ", re.IGNORECASE)
+# Areas that only restate another one (className follows classId...): hidden so "what changed" lists each thing once.
+DERIVED_AREAS = {"className", "subclassName", "qualityName"}
 
-ITEM_COLS = ["id", "name", "enc", "quality", "ilvl", "reqLvl", "cls", "sub", "inv", "gear", "icon", "first", "changed", "disc",
+ITEM_COLS = ["id", "name", "test", "enc", "quality", "ilvl", "reqLvl", "cls", "sub", "inv", "gear", "icon", "first", "changed", "disc",
              "base", "armor", "dps", "stats", "set", "shard"]
-SPELL_COLS = ["id", "name", "enc", "school", "castMs", "durMs", "icon", "tags", "first", "changed", "disc", "base", "text", "shard"]
+SPELL_COLS = ["id", "name", "test", "enc", "school", "castMs", "durMs", "icon", "tags", "first", "changed", "disc", "base", "text", "shard"]
 
 
 def read_jsonl(path):
@@ -99,8 +105,11 @@ def build(out_dir):
             icons.append(name)
         return icon_index[name]
 
-    items = [e for e in read_jsonl(DATA / "items.jsonl") if not e.get("removed")]
-    spells = [e for e in read_jsonl(DATA / "spells.jsonl") if not e.get("removed")]
+    all_items, all_spells = read_jsonl(DATA / "items.jsonl"), read_jsonl(DATA / "spells.jsonl")
+    items = [e for e in all_items if not e.get("removed")]
+    spells = [e for e in all_spells if not e.get("removed")]
+    # A removed entity is not browsable, but a build page that says "removed" should still name it.
+    removed = {("i", e["id"]): e["data"] for e in all_items if e.get("removed")} | {("s", e["id"]): e["data"] for e in all_spells if e.get("removed")}
     item_hist, spell_hist = history_by_id("items"), history_by_id("spells")
     names = {"items": {e["id"]: e["data"]["name"] for e in items}, "spells": {e["id"]: e["data"]["name"] for e in spells}}
 
@@ -119,7 +128,7 @@ def build(out_dir):
         for ev in events:
             row = {"v": versions.of(ev), "t": ev["type"]}
             if ev.get("areas"):
-                row["a"] = ev["areas"]
+                row["a"] = [a for a in ev["areas"] if a not in DERIVED_AREAS]
             if ev.get("changes"):
                 row["c"] = ev["changes"]
             if ev.get("discovery"):
@@ -143,7 +152,7 @@ def build(out_dir):
         d, c = e["data"], e["data"]["computed"]
         weapon = c.get("weapon")
         item_rows.append([
-            e["id"], d["name"], 1 if d["discovery"] == "encrypted" else 0, d["quality"], d["itemLevel"], d["requiredLevel"],
+            e["id"], d["name"], 1 if TEST_NAME.search(d["name"]) else 0, 1 if d["discovery"] == "encrypted" else 0, d["quality"], d["itemLevel"], d["requiredLevel"],
             d["classId"], d["subclassId"], d["inventoryType"], 1 if d["isGear"] else 0, icon_of(d["iconFileDataID"]),
             ver(e["firstSeen"]), ver(e["lastChanged"]), ver(e.get("discoveredAt")), 1 if e.get("baseline") else 0,
             c.get("armor", 0), round((weapon["min"] + weapon["max"]) / 2 / weapon["speed"], 1) if weapon else 0,
@@ -160,7 +169,7 @@ def build(out_dir):
         tooltip = c.get("tooltip") or {}
         text = 0 if not (d["description"] or d["auraDescription"]) else (1 if all(v is not None for v in tooltip.values()) else 2)
         spell_rows.append([
-            e["id"], d["name"], 1 if d["discovery"] == "encrypted" else 0, d.get("schoolMask", 0), d.get("castTimeMs"), d.get("durationMs"),
+            e["id"], d["name"], 1 if "marked-obsolete" in c["availability"] else 0, 1 if d["discovery"] == "encrypted" else 0, d.get("schoolMask", 0), d.get("castTimeMs"), d.get("durationMs"),
             icon_of(d.get("iconFileDataID", 0)), ids, ver(e["firstSeen"]), ver(e["lastChanged"]), ver(e.get("discoveredAt")),
             1 if e.get("baseline") else 0, text, position // SHARD_SIZE])
 
@@ -186,9 +195,13 @@ def build(out_dir):
             for ev in events:
                 row = {"k": kind, "id": eid, "t": ev["type"]}
                 if ev.get("areas"):
-                    row["a"] = ev["areas"]
+                    row["a"] = [a for a in ev["areas"] if a not in DERIVED_AREAS]
                 if ev.get("discovery"):
                     row["d"] = ev["discovery"]
+                if ev["type"] == "removed" and (kind, eid) in removed:
+                    last = removed[(kind, eid)]
+                    row["nm"] = last.get("name", "")
+                    row["ic"] = icon_names.get(str(last.get("iconFileDataID", 0)), "")
                 changes = ev.get("changes") or {}
                 if changes:
                     row["n"] = len(changes)
